@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     if (
       order.length === 0 ||
       order.some(
-        (item) =>
+        (item: any) =>
           typeof item?.id !== "number" ||
           !Number.isFinite(item.id) ||
           typeof item?.position !== "number" ||
