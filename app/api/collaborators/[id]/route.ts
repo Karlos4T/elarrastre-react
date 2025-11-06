@@ -14,18 +14,49 @@ function parseId(value: string | string[] | undefined) {
 
 type RouteContext = { params: Promise<{ id: string }> };
 
-function toDataUrl(image: string | null) {
-  if (!image) {
-    return null;
+function bufferFromUnknown(image: unknown): Buffer | null {
+  if (!image) return null;
+  if (Buffer.isBuffer(image)) return image;
+  if (image instanceof ArrayBuffer) return Buffer.from(image);
+  if (ArrayBuffer.isView(image)) {
+    const view = image as ArrayBufferView;
+    return Buffer.from(view.buffer, view.byteOffset, view.byteLength);
   }
-  if (image.startsWith("data:image")) {
-    return image;
+  if (typeof image === "object" && image !== null && "data" in image) {
+    const data = (image as { data?: ArrayLike<number> }).data;
+    if (data) {
+      return Buffer.from(data as ArrayLike<number>);
+    }
   }
-  if (image.startsWith("\\x")) {
-    const base64 = Buffer.from(image.slice(2), "hex").toString("base64");
-    return `data:image/png;base64,${base64}`;
+  if (Array.isArray(image)) {
+    return Buffer.from(image);
   }
-  return `data:image/png;base64,${image}`;
+  if (typeof image === "string") {
+    if (image.startsWith("\\x")) {
+      return Buffer.from(image.slice(2), "hex");
+    }
+    if (image.startsWith("data:image")) {
+      const base64 = image.split(",").pop();
+      return base64 ? Buffer.from(base64, "base64") : null;
+    }
+    return Buffer.from(image, "base64");
+  }
+  return null;
+}
+
+function serializeImage(image: unknown): string | null {
+  if (!image) return null;
+  if (typeof image === "string") {
+    if (image.startsWith("data:image")) return image;
+    if (image.startsWith("\\x")) {
+      const base64 = Buffer.from(image.slice(2), "hex").toString("base64");
+      return `data:image/png;base64,${base64}`;
+    }
+    return `data:image/png;base64,${image}`;
+  }
+  const buffer = bufferFromUnknown(image);
+  if (!buffer) return null;
+  return `data:image/png;base64,${buffer.toString("base64")}`;
 }
 
 export async function PUT(request: NextRequest, context: RouteContext) {
@@ -105,18 +136,9 @@ export async function PUT(request: NextRequest, context: RouteContext) {
       );
     }
 
-    const serializedImage =
-      typeof data.image === "string"
-        ? toDataUrl(data.image)
-        : data.image
-          ? `data:image/png;base64,${Buffer.from(
-              data.image as unknown as Uint8Array
-            ).toString("base64")}`
-          : null;
-
     return NextResponse.json({
       ...data,
-      image: serializedImage,
+      image: serializeImage(data.image),
     });
   } catch (error) {
     console.error("Error procesando PUT de colaborador", error);

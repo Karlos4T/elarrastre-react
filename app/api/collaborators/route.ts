@@ -6,6 +6,52 @@ function sanitize(value: unknown): string {
   return (typeof value === "string" ? value : "").trim();
 }
 
+function bufferFromUnknown(image: unknown): Buffer | null {
+  if (!image) return null;
+  if (Buffer.isBuffer(image)) return image;
+  if (image instanceof ArrayBuffer) return Buffer.from(image);
+  if (ArrayBuffer.isView(image)) {
+    const view = image as ArrayBufferView;
+    return Buffer.from(view.buffer, view.byteOffset, view.byteLength);
+  }
+  if (typeof image === "object" && image !== null && "data" in image) {
+    const data = (image as { data?: ArrayLike<number> }).data;
+    if (data) {
+      return Buffer.from(data as ArrayLike<number>);
+    }
+  }
+  if (Array.isArray(image)) {
+    return Buffer.from(image);
+  }
+  if (typeof image === "string") {
+    if (image.startsWith("\\x")) {
+      return Buffer.from(image.slice(2), "hex");
+    }
+    if (image.startsWith("data:image")) {
+      const base64 = image.split(",").pop();
+      return base64 ? Buffer.from(base64, "base64") : null;
+    }
+    return Buffer.from(image, "base64");
+  }
+  return null;
+}
+
+function serializeImage(image: unknown): string | null {
+  if (!image) return null;
+  if (typeof image === "string") {
+    if (image.startsWith("data:image")) return image;
+    if (image.startsWith("\\x")) {
+      const base64 = Buffer.from(image.slice(2), "hex").toString("base64");
+      return `data:image/png;base64,${base64}`;
+    }
+    return `data:image/png;base64,${image}`;
+  }
+
+  const buffer = bufferFromUnknown(image);
+  if (!buffer) return null;
+  return `data:image/png;base64,${buffer.toString("base64")}`;
+}
+
 export async function GET() {
   try {
     const supabase = createSupabaseAdminClient();
@@ -24,34 +70,10 @@ export async function GET() {
     }
 
     const serialized =
-      data?.map((item) => {
-        // Si no hay imagen, devolvemos null
-        if (!item.image || typeof item.image !== "string") {
-          return { ...item, image: null };
-        }
-
-        // Si viene en formato hexadecimal (\x89PNG...)
-        if (item.image.startsWith("\\x")) {
-          const base64 = Buffer.from(item.image.slice(2), "hex").toString("base64");
-          return {
-            ...item,
-            image: `data:image/png;base64,${base64}`, // 👈 ahora es usable directamente
-          };
-        }
-
-        // Si ya es base64, solo nos aseguramos de anteponer el encabezado
-        if (!item.image.startsWith("data:image")) {
-          return {
-            ...item,
-            image: `data:image/png;base64,${item.image}`,
-          };
-        }
-
-        return {
-          ...item,
-          image: item.image,
-        };
-      }) ?? [];
+      data?.map((item) => ({
+        ...item,
+        image: serializeImage(item.image),
+      })) ?? [];
 
     return NextResponse.json(serialized);
   } catch (error) {
@@ -111,6 +133,11 @@ export async function POST(request: Request) {
       );
     }
 
+    const explicitPosition =
+      typeof body?.position === "number" && Number.isFinite(body.position)
+        ? Number(body.position)
+        : null;
+
     const { data: highestPositionRows } = await supabase
       .from("collaborators")
       .select("position")
@@ -118,18 +145,18 @@ export async function POST(request: Request) {
       .limit(1);
 
     const nextPosition =
-      typeof body?.position === "number"
-        ? body.position
-        : ((highestPositionRows?.[0]?.position ?? 0) as number) + 1;
+      explicitPosition ?? ((highestPositionRows?.[0]?.position ?? 0) as number) + 1;
+
+    const insertPayload: Record<string, unknown> = {
+      name,
+      image: imageBuffer,
+      web_link: webLink || null,
+      position: nextPosition,
+    };
 
     const { data, error } = await supabase
       .from("collaborators")
-      .insert({
-        name,
-        image: imageBuffer,
-        web_link: webLink || null,
-        position: nextPosition,
-      })
+      .insert(insertPayload)
       .select("id, name, image, created_at, web_link, position")
       .single();
 
@@ -142,19 +169,15 @@ export async function POST(request: Request) {
     }
 
     // añadimos también data URL en la respuesta POST
-    const withImageUrl = data
-      ? {
-        ...data,
-        image: data.image
-          ? `data:image/png;base64,${Buffer.from(
-              data.image,
-              "binary"
-            ).toString("base64")}`
-          : null,
-      }
-      : data;
-
-    return NextResponse.json(withImageUrl, { status: 201 });
+    return NextResponse.json(
+      data
+        ? {
+            ...data,
+            image: serializeImage(data.image),
+          }
+        : data,
+      { status: 201 }
+    );
   } catch (error) {
     console.error("Error procesando POST de colaboradores", error);
     return NextResponse.json(

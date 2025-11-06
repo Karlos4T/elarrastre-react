@@ -27,6 +27,7 @@ export default function HeroBanner() {
       gsap.set(".hero-campaign", { y: -20 });
       gsap.set(".hero-medal", { x: -110 });
       gsap.set(".hero-circle-date", { x: 50, y: 50 });
+      gsap.set(".hero-square-bottom", { x: 20, y: 70 });
 
       const timeline = gsap.timeline({ defaults: { ease: "power3.out" } });
 
@@ -105,6 +106,15 @@ export default function HeroBanner() {
             duration: 0.6,
           },
           "-=0.3"
+        )
+        .from(
+          ".hero-action-button",
+          {
+            y: "+=160",
+            scale: 0.9,
+            duration: 0.6,
+          },
+          "-=0.3"
         );
 
       gsap.from(".hero-actions", {
@@ -179,6 +189,7 @@ export default function HeroBanner() {
           <DateCircle />
           <OrangeGear />
           <HeroStarMessage />
+          <ActionButton />
         </div>
 
         <div className="hero-actions hero-actions--poster">
@@ -190,7 +201,7 @@ export default function HeroBanner() {
             <Link href="/contacto">Enviar propuesta</Link>
           </div>
         </div>
-      </header>
+      </header >
 
       <RegistrationModal open={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </>
@@ -310,4 +321,13 @@ function OrangeGear() {
   return <div className="hero-gear hero-gear-orange" aria-hidden="true" >
     <img src="/shapes/logo-arrastre.svg" alt="" />
   </div>;
+}
+
+
+function ActionButton() {
+  return (
+    <div className="hero-action-button">
+      <img src="/shapes/logo-ayto.svg" alt="" />
+    </div>
+  );
 }

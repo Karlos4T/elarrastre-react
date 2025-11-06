@@ -5,15 +5,15 @@ function sanitize(value: unknown): string {
   return (typeof value === "string" ? value : "").trim();
 }
 
-export async function POST(request: Request) {
+export async function POST(_request: Request) {
   try {
-    const body = await request.json();
+    const body = await _request.json();
     const name = sanitize(body?.name);
     const mail = sanitize(body?.mail);
     const phone = sanitize(body?.phone);
-    const text_request = sanitize(body?.request);
+    const request = sanitize(body?.request);
 
-    if (!name || !mail || !text_request) {
+    if (!name || !mail || !request) {
       return NextResponse.json(
         { error: "Nombre, email y propuesta son obligatorios." },
         { status: 400 }

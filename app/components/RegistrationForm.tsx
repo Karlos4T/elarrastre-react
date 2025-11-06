@@ -15,10 +15,21 @@ type RegistrationFormProps = {
 
 export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
   const [name, setName] = useState("");
-  const [companionName, setCompanionName] = useState("");
-  const [includeCompanion, setIncludeCompanion] = useState(false);
+  const [companionNames, setCompanionNames] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [state, setState] = useState<FormState>(initialState);
+
+  const addCompanionField = () => {
+    setCompanionNames((prev) => [...prev, ""]);
+  };
+
+  const updateCompanionName = (index: number, value: string) => {
+    setCompanionNames((prev) => prev.map((name, i) => (i === index ? value : name)));
+  };
+
+  const removeCompanionField = (index: number) => {
+    setCompanionNames((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -27,9 +38,12 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
     setSubmitting(true);
 
     const names = [name.trim()];
-    if (includeCompanion && companionName.trim()) {
-      names.push(companionName.trim());
-    }
+    companionNames.forEach((extra) => {
+      const trimmed = extra.trim();
+      if (trimmed) {
+        names.push(trimmed);
+      }
+    });
 
     const payload = {
       name: names.filter(Boolean).join(" + "),
@@ -50,7 +64,7 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
       }
 
       setName("");
-      setCompanionName("");
+      setCompanionNames([]);
       setState({ message: "¡Gracias por unirte!", error: null });
       onSuccess?.();
     } catch (error) {
@@ -83,26 +97,39 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
           className="rounded-[26px] border-2 border-[var(--color-ink)]/10 bg-white px-4 py-3 text-base font-medium text-[var(--color-ink)] outline-none transition focus:border-[var(--color-sky)] focus:ring-2 focus:ring-[var(--color-sky)]/40"
         />
       </label>
-      {!includeCompanion ? (
-        <button
-          type="button"
-          className="button-secondary w-full sm:w-auto"
-          onClick={() => setIncludeCompanion(true)}
-        >
-          Voy con más gente
-        </button>
-      ) : (
-        <label className="flex flex-col gap-2 text-sm font-medium text-[var(--color-ink)]">
-          Nombre extra
-          <input
-            type="text"
-            value={companionName}
-            onChange={(event) => setCompanionName(event.target.value)}
-            placeholder="Añade a tu compi"
-            className="rounded-[26px] border-2 border-[var(--color-ink)]/10 bg-white px-4 py-3 text-base font-medium text-[var(--color-ink)] outline-none transition focus:border-[var(--color-sky)] focus:ring-2 focus:ring-[var(--color-sky)]/40"
-          />
-        </label>
+      {companionNames.length > 0 && (
+        <div className="flex flex-col gap-3 rounded-3xl border-2 border-[var(--color-ink)]/10 bg-white/70 px-4 py-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-ink)]/60">
+            Acompañantes
+          </p>
+          {companionNames.map((companion, index) => (
+            <div key={index} className="flex items-center gap-2">
+              <input
+                type="text"
+                value={companion}
+                onChange={(event) => updateCompanionName(index, event.target.value)}
+                placeholder={`Nombre extra ${index + 1}`}
+                className="flex-1 rounded-[24px] border-2 border-[var(--color-ink)]/10 bg-white px-3 py-2 text-sm font-medium text-[var(--color-ink)] outline-none transition focus:border-[var(--color-sky)] focus:ring-2 focus:ring-[var(--color-sky)]/30"
+              />
+              <button
+                type="button"
+                onClick={() => removeCompanionField(index)}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border-2 border-[var(--color-ink)]/15 text-base text-[var(--color-ink)]/80 transition hover:bg-red-50 hover:text-red-500"
+                aria-label={`Eliminar acompañante ${index + 1}`}
+              >
+                ✕
+              </button>
+            </div>
+          ))}
+        </div>
       )}
+      <button
+        type="button"
+        className="button-secondary w-full sm:w-auto"
+        onClick={addCompanionField}
+      >
+        Añadir acompañante
+      </button>
       <button type="submit" disabled={submitting} className="button-primary w-full sm:w-auto">
         {submitting ? "Enviando..." : "Quiero participar"}
       </button>

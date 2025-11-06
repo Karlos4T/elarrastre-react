@@ -1,5 +1,6 @@
 "use client";
 
+import { Save, Trash, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { DragEvent, FormEvent, useEffect, useMemo, useState } from "react";
 
@@ -71,6 +72,10 @@ export default function AdminDashboard({
   );
   const [orderSaving, setOrderSaving] = useState(false);
   const [orderError, setOrderError] = useState<string | null>(null);
+  const [contactRequestList, setContactRequestList] = useState(contactRequests);
+  const [contactToDelete, setContactToDelete] = useState<ContactRequest | null>(null);
+  const [contactDeleting, setContactDeleting] = useState(false);
+  const [contactDeleteError, setContactDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     setCollaboratorList(collaborators);
@@ -79,14 +84,17 @@ export default function AdminDashboard({
 
   const totalRegistrations = registrations.length;
   const totalCollaborators = collaboratorList.length;
-  const totalRequests = contactRequests.length;
+  const totalRequests = contactRequestList.length;
 
   const mostRecentRequest = useMemo(() => {
-    return contactRequests
+    return contactRequestList
       .slice()
       .sort(
         (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       )[0];
+  }, [contactRequestList]);
+  useEffect(() => {
+    setContactRequestList(contactRequests);
   }, [contactRequests]);
 
   const handleChange = (id: number, value: string) => {
@@ -300,6 +308,47 @@ export default function AdminDashboard({
     openCollaboratorModal(collaborator);
   };
 
+  const requestDeleteContact = (contact: ContactRequest) => {
+    setContactDeleteError(null);
+    setContactToDelete(contact);
+  };
+
+  const cancelDeleteContact = () => {
+    if (contactDeleting) {
+      return;
+    }
+    setContactToDelete(null);
+    setContactDeleteError(null);
+  };
+
+  const confirmDeleteContact = async () => {
+    if (!contactToDelete) {
+      return;
+    }
+    setContactDeleting(true);
+    setContactDeleteError(null);
+    try {
+      const response = await fetch(`/api/contact/${contactToDelete.id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data?.error || "No se pudo eliminar la propuesta.");
+      }
+      setContactRequestList((prev) =>
+        prev.filter((contact) => contact.id !== contactToDelete.id)
+      );
+      setActionState({ message: "Propuesta eliminada.", error: null });
+      setContactToDelete(null);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "No se pudo completar la solicitud.";
+      setContactDeleteError(message);
+    } finally {
+      setContactDeleting(false);
+    }
+  };
+
   const handleLogout = async (event: FormEvent<HTMLButtonElement>) => {
     event.preventDefault();
     setLoggingOut(true);
@@ -416,7 +465,7 @@ export default function AdminDashboard({
                     aria-label="Guardar cambios"
                     className="inline-flex h-11 w-11 items-center justify-center rounded-full border-2 border-[var(--color-ink)]/20 text-lg transition hover:bg-[var(--color-sky)]/20 disabled:cursor-not-allowed disabled:opacity-40"
                   >
-                    <span aria-hidden="true">💾</span>
+                    <span aria-hidden="true"><Save/></span>
                   </button>
                   <button
                     type="button"
@@ -425,7 +474,7 @@ export default function AdminDashboard({
                     aria-label="Eliminar registro"
                     className="inline-flex h-11 w-11 items-center justify-center rounded-full border-2 border-red-300 text-lg text-red-600 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    <span aria-hidden="true">🗑</span>
+                    <span aria-hidden="true"><Trash2/></span>
                   </button>
                   <p className="col-span-full text-xs font-medium text-[var(--color-ink)]/60">
                     Apuntado el{" "}
@@ -495,24 +544,24 @@ export default function AdminDashboard({
                         loading="lazy"
                       />
                     ) : (
-                  <div className="flex h-full w-full items-center justify-center text-xs text-[var(--color-ink)]/60">
-                    Sin imagen
+                      <div className="flex h-full w-full items-center justify-center text-xs text-[var(--color-ink)]/60">
+                        Sin imagen
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-              <p className="text-sm font-semibold text-[var(--color-ink)]">
-                {collaborator.name}
-              </p>
-              {collaborator.webLink && (
-                <p className="text-xs font-medium text-[var(--color-sky)] underline">
-                  {collaborator.webLink}
-                </p>
-              )}
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[var(--color-ink)]/60">
-                Alta el{" "}
-                {new Date(collaborator.created_at).toLocaleDateString("es-ES", {
-                  day: "2-digit",
-                  month: "short",
+                  <p className="text-sm font-semibold text-[var(--color-ink)]">
+                    {collaborator.name}
+                  </p>
+                  {collaborator.webLink && (
+                    <p className="text-xs font-medium text-[var(--color-sky)] underline">
+                      {collaborator.webLink}
+                    </p>
+                  )}
+                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[var(--color-ink)]/60">
+                    Alta el{" "}
+                    {new Date(collaborator.created_at).toLocaleDateString("es-ES", {
+                      day: "2-digit",
+                      month: "short",
                       year: "numeric",
                     })}
                   </p>
@@ -521,14 +570,14 @@ export default function AdminDashboard({
             ))}
           </ul>
         )}
-        <CollaboratorModal
-          open={collaboratorModal.open}
-          collaborator={collaboratorModal.collaborator}
-          onClose={closeCollaboratorModal}
-          onSaved={handleCollaboratorSaved}
-          onDeleted={handleCollaboratorDeleted}
-        />
       </section>
+      <CollaboratorModal
+        open={collaboratorModal.open}
+        collaborator={collaboratorModal.collaborator}
+        onClose={closeCollaboratorModal}
+        onSaved={handleCollaboratorSaved}
+        onDeleted={handleCollaboratorDeleted}
+      />
 
       <section className="organic-card grid gap-6 border-[var(--color-ink)]/0 p-6 sm:p-8">
         <div className="flex flex-col gap-1">
@@ -539,13 +588,13 @@ export default function AdminDashboard({
             Contacta con los colaboradores potenciales y coordina su aportación.
           </p>
         </div>
-        {contactRequests.length === 0 ? (
+        {contactRequestList.length === 0 ? (
           <p className="rounded-xl border-2 border-dashed border-[var(--color-ink)]/15 px-4 py-8 text-center text-sm font-medium text-[var(--color-ink)]/60">
             No hay propuestas registradas todavía.
           </p>
         ) : (
           <ul className="grid gap-4">
-            {contactRequests.map((contact) => (
+            {contactRequestList.map((contact) => (
               <li
                 key={contact.id}
                 className="grid gap-3 rounded-[32px] border-2 border-[var(--color-ink)]/10 bg-white p-4 shadow-[0_10px_0_rgba(27,27,31,0.05)]"
@@ -578,11 +627,29 @@ export default function AdminDashboard({
                 <p className="rounded-[24px] border border-[var(--color-ink)]/10 bg-white/80 p-3 text-sm font-medium leading-relaxed text-[var(--color-ink)]">
                   {contact.request}
                 </p>
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => requestDeleteContact(contact)}
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-full border-2 border-red-300 text-base text-red-600 transition hover:bg-red-100"
+                    aria-label="Eliminar propuesta"
+                  >
+                    🗑
+                  </button>
+                </div>
               </li>
             ))}
           </ul>
         )}
       </section>
+      <ContactDeleteModal
+        open={Boolean(contactToDelete)}
+        contact={contactToDelete}
+        onCancel={cancelDeleteContact}
+        onConfirm={confirmDeleteContact}
+        submitting={contactDeleting}
+        error={contactDeleteError}
+      />
     </div>
   );
 }
@@ -889,6 +956,83 @@ function CollaboratorModal({
           </div>
         </div>
       </form>
+    </div>
+  );
+}
+
+type ContactDeleteModalProps = {
+  open: boolean;
+  contact: ContactRequest | null;
+  onCancel: () => void;
+  onConfirm: () => void;
+  submitting: boolean;
+  error: string | null;
+};
+
+function ContactDeleteModal({
+  open,
+  contact,
+  onCancel,
+  onConfirm,
+  submitting,
+  error,
+}: ContactDeleteModalProps) {
+  if (!open || !contact) {
+    return null;
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+      <div className="w-full max-w-md rounded-[32px] border-4 border-[var(--color-ink)] bg-white p-6 shadow-[0_18px_0_rgba(27,27,31,0.18)] sm:p-8">
+        <h3 className="text-xl font-bold text-[var(--color-ink)]">
+          ¿Eliminar esta propuesta?
+        </h3>
+        <p className="mt-2 text-sm font-medium text-[var(--color-ink)]/70">
+          Esta acción no se puede deshacer. Se eliminará la propuesta enviada por{" "}
+          <strong>{contact.name}</strong>.
+        </p>
+
+        <div className="mt-6 space-y-3 text-sm text-[var(--color-ink)]/70">
+          <div>
+            <span className="font-semibold text-[var(--color-ink)]">Email:</span>{" "}
+            {contact.mail}
+          </div>
+          {contact.phone && (
+            <div>
+              <span className="font-semibold text-[var(--color-ink)]">Teléfono:</span>{" "}
+              {contact.phone}
+            </div>
+          )}
+          <div className="rounded-2xl border border-[var(--color-ink)]/10 bg-[var(--color-ink)]/5 p-3 text-sm leading-relaxed text-[var(--color-ink)]">
+            {contact.request}
+          </div>
+        </div>
+
+        {error && (
+          <p className="mt-4 rounded-xl border border-red-200 bg-red-100 px-4 py-2 text-sm font-semibold text-red-600">
+            {error}
+          </p>
+        )}
+
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={submitting}
+            className="inline-flex items-center justify-center rounded-full border-2 border-[var(--color-ink)]/20 px-5 py-2 text-sm font-semibold text-[var(--color-ink)] transition hover:bg-[var(--color-ink)]/5 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            disabled={submitting}
+            className="inline-flex items-center justify-center rounded-full border-2 border-red-300 px-5 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {submitting ? "Eliminando..." : "Eliminar"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

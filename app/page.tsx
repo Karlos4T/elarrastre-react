@@ -1,3 +1,4 @@
+import Link from "next/link";
 import RegistrationForm from "./components/RegistrationForm";
 import ContactForm from "./components/ContactForm";
 import { createSupabaseAdminClient } from "../lib/supabaseAdmin";
@@ -57,7 +58,7 @@ export default async function Home() {
 
         <section
           id="registro"
-          className="relative grid gap-8 lg:grid-cols-[1.2fr_1fr] lg:items-start"
+          className="relative grid gap-8 rounded-[48px] bg-[var(--color-tangerine)]/25 p-6 lg:grid-cols-[1.2fr_1fr] lg:items-start lg:p-10"
         >
           <RegistrationForm />
           <div className="organic-card flex flex-col gap-4 p-6 text-sm leading-relaxed text-[var(--color-ink)] sm:p-8">
@@ -109,8 +110,16 @@ export default async function Home() {
         </section>
 
         <footer className="rounded-[36px] border-4 border-[var(--color-ink)] bg-white px-8 py-6 text-sm font-semibold text-[var(--color-ink)] shadow-[0_12px_0_rgba(27,27,31,0.08)]">
-          © {new Date().getFullYear()} El Arrastre Solidario · Cultura que abraza, comunidad
-          que transforma.
+          <p>
+            © {new Date().getFullYear()} El Arrastre Solidario · Cultura que abraza,
+            comunidad que transforma.
+          </p>
+          <Link
+            href="/admin"
+            className="mt-4 inline-flex w-full items-center justify-center rounded-full border-2 border-[var(--color-ink)] px-6 py-2 text-base font-semibold transition hover:bg-[var(--color-ink)] hover:text-white sm:w-auto"
+          >
+            Panel de administración
+          </Link>
         </footer>
       </main>
     </div>
