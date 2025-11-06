@@ -110,7 +110,7 @@ export default function HeroBanner() {
         .from(
           ".hero-action-button",
           {
-            y: "+=160",
+            y: "+=200",
             scale: 0.9,
             duration: 0.6,
           },

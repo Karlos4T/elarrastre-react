@@ -79,7 +79,7 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="organic-card flex w-full flex-col gap-5 p-6 sm:p-8"
+      className="registration-card organic-card flex w-full flex-col gap-5 p-6 sm:p-8 reveal-on-scroll"
     >
       <h2 className="text-2xl font-semibold text-[var(--color-ink)]">
         ¡Apúntate a esta <span className="highlight-text">ola solidaria!</span>

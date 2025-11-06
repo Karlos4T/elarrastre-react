@@ -60,7 +60,7 @@ export default function ContactForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="organic-card flex w-full flex-col gap-5 p-6 sm:p-8"
+      className="contact-form organic-card flex w-full flex-col gap-5 p-6 sm:p-8 reveal-on-scroll"
     >
       <h2 className="text-2xl font-semibold text-[var(--color-ink)]">
         ¿Quieres colaborar? <span className="highlight-text">¡Te necesitamos!</span>

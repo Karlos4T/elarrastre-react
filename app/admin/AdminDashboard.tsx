@@ -1,8 +1,9 @@
 "use client";
 
-import { Save, Trash, Trash2 } from "lucide-react";
+import { Save, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { DragEvent, FormEvent, useEffect, useMemo, useState } from "react";
+import MobileAdminNav from "./MobileAdminNav";
 
 type Registration = {
   id: number;
@@ -374,7 +375,8 @@ export default function AdminDashboard({
     }
   };
   return (
-    <div className="flex w-full flex-col gap-12">
+    <div className="flex w-full flex-col gap-12 pb-28 md:pb-12">
+      <MobileAdminNav />
       <header className="flex flex-col gap-4 rounded-[48px] border-4 border-[var(--color-ink)] bg-white p-8 shadow-[0_18px_0_rgba(27,27,31,0.1)] sm:p-10">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-col gap-2">
@@ -420,7 +422,10 @@ export default function AdminDashboard({
         )}
       </header>
 
-      <section className="organic-card grid gap-6 border-[var(--color-ink)]/0 p-6 sm:p-8">
+      <section
+        id="admin-registrations"
+        className="admin-section organic-card grid gap-6 border-[var(--color-ink)]/0 p-6 sm:p-8 reveal-on-scroll"
+      >
         <div className="flex flex-col gap-1">
           <h2 className="text-xl font-semibold text-[var(--color-ink)]">
             Participantes apuntados
@@ -491,7 +496,10 @@ export default function AdminDashboard({
         )}
       </section>
 
-      <section className="organic-card grid gap-6 border-[var(--color-ink)]/0 p-6 sm:p-8">
+      <section
+        id="admin-collaborators"
+        className="admin-section organic-card grid gap-6 border-[var(--color-ink)]/0 p-6 sm:p-8 reveal-on-scroll"
+      >
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-col gap-1">
             <h2 className="text-xl font-semibold text-[var(--color-ink)]">
@@ -579,7 +587,10 @@ export default function AdminDashboard({
         onDeleted={handleCollaboratorDeleted}
       />
 
-      <section className="organic-card grid gap-6 border-[var(--color-ink)]/0 p-6 sm:p-8">
+      <section
+        id="admin-proposals"
+        className="admin-section organic-card grid gap-6 border-[var(--color-ink)]/0 p-6 sm:p-8 reveal-on-scroll"
+      >
         <div className="flex flex-col gap-1">
           <h2 className="text-xl font-semibold text-[var(--color-ink)]">
             Propuestas recibidas

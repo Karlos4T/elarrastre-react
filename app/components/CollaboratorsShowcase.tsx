@@ -37,7 +37,7 @@ export default function CollaboratorsShowcase({ collaborators }: Props) {
 
   return (
     <>
-      <div className="flex flex-col gap-10">
+      <div className="reveal-on-scroll flex flex-col gap-10">
         <div className="collab-header">
           <h2 className="text-3xl font-extrabold text-[var(--color-ink)]">Colaboradores</h2>
           <p className="max-w-2xl text-sm font-medium text-[var(--color-ink)]/70">
@@ -56,11 +56,11 @@ export default function CollaboratorsShowcase({ collaborators }: Props) {
             Todavía no hay colaboradores publicados. ¡Sé la primera persona en sumarte!
           </p>
         ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="collab-grid">
             {decorated.map((collaborator) => (
               <article
                 key={collaborator.id}
-                className="collab-card"
+                className="collab-card reveal-on-scroll"
                 style={{ "--collab-tone": collaborator.tone } as CSSProperties}
               >
                 <div className="collab-avatar">

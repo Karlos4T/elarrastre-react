@@ -4,6 +4,9 @@ import ContactForm from "./components/ContactForm";
 import { createSupabaseAdminClient } from "../lib/supabaseAdmin";
 import HeroBanner from "./components/HeroBanner";
 import CollaboratorsShowcase from "./components/CollaboratorsShowcase";
+import ScrollAnimations from "./components/ScrollAnimations";
+import PreviousEditions from "./components/PreviousEditions";
+import MobileNav from "./components/MobileNav";
 
 type CollaboratorRow = {
   id: number;
@@ -50,15 +53,16 @@ export default async function Home() {
 
   return (
     <div className="page-shell min-h-screen w-full bg-[var(--color-blush)] text-[var(--color-ink)]">
+      <ScrollAnimations />
       <HeroBanner />
-      <main className="relative flex min-h-screen w-full flex-col gap-16 px-6 py-16 sm:px-10 lg:px-20">
+      <main className="relative flex min-h-screen w-full flex-col gap-16 px-6 py-16 pb-32 sm:px-10 lg:px-20 lg:pb-20">
         <div className="shape-sunburst" />
         <div className="shape-cloud" />
         <div className="shape-heartband" />
 
         <section
           id="registro"
-          className="relative grid gap-8 rounded-[48px] bg-[var(--color-tangerine)]/25 p-6 lg:grid-cols-[1.2fr_1fr] lg:items-start lg:p-10"
+          className="reveal-on-scroll relative grid gap-8 rounded-[48px] lg:grid-cols-[1.2fr_1fr] lg:items-start lg:p-10"
         >
           <RegistrationForm />
           <div className="organic-card flex flex-col gap-4 p-6 text-sm leading-relaxed text-[var(--color-ink)] sm:p-8">
@@ -78,13 +82,15 @@ export default async function Home() {
           </div>
         </section>
 
-        <section id="colaboradores" className="flex flex-col gap-10">
+        <section id="colaboradores" className="reveal-on-scroll flex flex-col gap-10">
           <CollaboratorsShowcase collaborators={collaborators} />
         </section>
 
+        <PreviousEditions />
+
         <section
           id="contacto"
-          className="grid gap-8 lg:grid-cols-[1.2fr_1fr] lg:items-start"
+          className="reveal-on-scroll grid gap-8 lg:grid-cols-[1.2fr_1fr] lg:items-start"
         >
           <ContactForm />
           <div className="organic-card flex flex-col gap-4 p-6 text-sm leading-relaxed text-[var(--color-ink)] sm:p-8">
