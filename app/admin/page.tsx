@@ -35,15 +35,15 @@ export default async function AdminPage() {
   const [registrationsResult, collaboratorsResult, contactRequestsResult] =
     await Promise.all([
       supabase
-        .from<RegistrationRow>("registrations")
+        .from("registrations")
         .select("id, name, created_at")
         .order("created_at", { ascending: false }),
       supabase
-        .from<CollaboratorRow>("collaborators")
+        .from("collaborators")
         .select("id, name, image, created_at")
         .order("created_at", { ascending: false }),
       supabase
-        .from<ContactRequestRow>("contact_requests")
+        .from("contact_requests")
         .select("id, name, mail, phone, request, created_at")
         .order("created_at", { ascending: false }),
     ]);

@@ -16,7 +16,7 @@ type Collaborator = CollaboratorRow & { imageSrc: string | null };
 export default async function Home() {
   const supabase = createSupabaseAdminClient();
   const { data, error } = await supabase
-    .from<CollaboratorRow>("collaborators")
+    .from("collaborators")
     .select("id, name, image, created_at")
     .order("created_at", { ascending: false });
 

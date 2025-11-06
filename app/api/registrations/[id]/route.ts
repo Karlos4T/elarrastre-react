@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdminClient } from "../../../../lib/supabaseAdmin";
 import { AdminUnauthorizedError, requireAdminSession } from "../../../../lib/auth";
 
@@ -12,10 +12,9 @@ function parseId(param: string | string[] | undefined) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+type RouteContext = { params: Promise<{ id: string }> };
+
+export async function PUT(request: NextRequest, context: RouteContext) {
   try {
     try {
       requireAdminSession();
@@ -26,7 +25,8 @@ export async function PUT(
       throw error;
     }
 
-    const id = parseId(params?.id);
+    const { id: rawId } = await context.params;
+    const id = parseId(rawId);
     if (!id) {
       return NextResponse.json({ error: "Identificador inválido." }, { status: 400 });
     }
@@ -74,10 +74,7 @@ export async function PUT(
   }
 }
 
-export async function DELETE(
-  _request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(_request: NextRequest, context: RouteContext) {
   try {
     try {
       requireAdminSession();
@@ -88,7 +85,8 @@ export async function DELETE(
       throw error;
     }
 
-    const id = parseId(params?.id);
+    const { id: rawId } = await context.params;
+    const id = parseId(rawId);
     if (!id) {
       return NextResponse.json({ error: "Identificador inválido." }, { status: 400 });
     }
