@@ -9,16 +9,19 @@ type CollaboratorRow = {
   name: string;
   image: string | null;
   created_at: string;
+  web_link: string | null;
+  position: number | null;
 };
 
-type Collaborator = CollaboratorRow & { imageSrc: string | null };
+type Collaborator = CollaboratorRow & { imageSrc: string | null; webLink: string | null };
 
 export default async function Home() {
   const supabase = createSupabaseAdminClient();
   const { data, error } = await supabase
     .from("collaborators")
-    .select("id, name, image, created_at")
-    .order("created_at", { ascending: false });
+    .select("id, name, image, created_at, web_link, position")
+    .order("position", { ascending: true, nullsFirst: false })
+    .order("created_at", { ascending: true });
 
   if (error) {
     throw new Error(`No se pudo obtener la lista de colaboradores: ${error.message}`);
@@ -32,14 +35,17 @@ export default async function Home() {
     return image;
   };
 
-  const collaborators: Collaborator[] =
-    data?.map((item) => ({
+  const collaborators: Collaborator[] = (data ?? [])
+    .map((item, index) => ({
       ...item,
       imageSrc: (() => {
         const base64 = normalizeImage(item.image);
         return base64 ? `data:image/png;base64,${base64}` : null;
       })(),
-    })) ?? [];
+      webLink: item.web_link,
+      position: item.position ?? index + 1,
+    }))
+    .sort((a, b) => (a.position ?? Infinity) - (b.position ?? Infinity));
 
   return (
     <div className="page-shell min-h-screen w-full bg-[var(--color-blush)] text-[var(--color-ink)]">

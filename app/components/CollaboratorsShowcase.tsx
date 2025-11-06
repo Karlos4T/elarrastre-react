@@ -7,6 +7,7 @@ type Collaborator = {
   id: number;
   name: string;
   imageSrc: string | null;
+  webLink?: string | null;
 };
 
 const CARD_COLORS = [
@@ -71,7 +72,18 @@ export default function CollaboratorsShowcase({ collaborators }: Props) {
                     </div>
                   )}
                 </div>
-                <span className="collab-name">{collaborator.name}</span>
+                {collaborator.webLink ? (
+                  <a
+                    href={collaborator.webLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="collab-name underline-offset-4 hover:underline"
+                  >
+                    {collaborator.name}
+                  </a>
+                ) : (
+                  <span className="collab-name">{collaborator.name}</span>
+                )}
               </article>
             ))}
           </div>

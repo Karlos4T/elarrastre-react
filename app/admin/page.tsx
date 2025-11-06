@@ -8,6 +8,8 @@ type CollaboratorRow = {
   name: string;
   image: string | null;
   created_at: string;
+  web_link: string | null;
+  position: number | null;
 };
 
 type RegistrationRow = {
@@ -26,7 +28,7 @@ type ContactRequestRow = {
 };
 
 export default async function AdminPage() {
-  const session = getAdminSession();
+  const session = await getAdminSession();
   if (!session) {
     redirect("/admin/login");
   }
@@ -40,8 +42,9 @@ export default async function AdminPage() {
         .order("created_at", { ascending: false }),
       supabase
         .from("collaborators")
-        .select("id, name, image, created_at")
-        .order("created_at", { ascending: false }),
+        .select("id, name, image, created_at, web_link, position")
+        .order("position", { ascending: true, nullsFirst: false })
+        .order("created_at", { ascending: true }),
       supabase
         .from("contact_requests")
         .select("id, name, mail, phone, request, created_at")
@@ -74,13 +77,17 @@ export default async function AdminPage() {
     return image;
   };
 
-  const collaborators = (collaboratorsResult.data ?? []).map((item) => ({
-    ...item,
-    imageSrc: (() => {
-      const base64 = normalizeImage(item.image);
-      return base64 ? `data:image/png;base64,${base64}` : null;
-    })(),
-  }));
+  const collaborators = (collaboratorsResult.data ?? [])
+    .map((item, index) => ({
+      ...item,
+      imageSrc: (() => {
+        const base64 = normalizeImage(item.image);
+        return base64 ? `data:image/png;base64,${base64}` : null;
+      })(),
+      webLink: item.web_link,
+      position: item.position ?? index + 1,
+    }))
+    .sort((a, b) => (a.position ?? Infinity) - (b.position ?? Infinity));
 
   return (
     <div className="page-shell min-h-screen bg-[var(--color-cream)] text-[var(--color-ink)]">

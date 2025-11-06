@@ -6,7 +6,7 @@
   --color-sun: #ffdb3b;
   --color-tangerine: #fd6327;
   --color-forest: #178f50;
-  --color-lilac: #cfa5ff;
+  --color-lilac: #8C76DC;
   --color-sky: #6aa8ff;
   --color-blush: #f7b8c6;
   --color-ink: #1b1b1f;
@@ -39,6 +39,10 @@ input,
 textarea,
 button {
   font-family: var(--font-secondary, "Space Grotesk", system-ui), sans-serif;
+}
+
+button {
+  cursor: pointer;
 }
 
 .page-shell {
@@ -258,8 +262,19 @@ button {
 }
 
 .hero-gear-orange {
+  z-index: 7;
   grid-area: 8 / 2 / 12 / 5;
+  background-image: url("/shapes/orange-gear.png");
   color: var(--color-tangerine);
+  padding: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-gear-orange img {
+  width: 200px;
+  transform: translate(0) !important;
 }
 
 .hero-square {
@@ -286,26 +301,31 @@ button {
 .hero-medal {
   z-index: 5;
   grid-area: 7 / 1 / 10 / 3;
-  background: var(--color-lilac);
-  border-radius: 0 50rem 50rem 0;
-  box-shadow: 0 18px 0 rgba(27, 27, 31, 0.1);
+  background-image: url("/shapes/purple-medal.svg");
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: start;
   justify-content: center;
-  gap: 2.25rem;
+  gap: 2rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   color: var(--color-sun);
   padding: 1rem;
+  padding-left: 8rem;
+  padding-top: 2rem;
 }
 
 .hero-medal .title {
-  font-size: 2rem;
+  font-size: 1.6rem;
+  width: 160px;
 }
 
 .hero-medal .subtitle {
-  font-size: 1.2rem;
+  font-size: 1rem;
+  width: 160px;
 }
 
 .hero-pill {
@@ -319,21 +339,24 @@ button {
   grid-area: 10 / 4 / 13 / 6;
   background: var(--color-lilac);
   border-radius: 50%;
-  box-shadow: 0 18px 0 rgba(27, 27, 31, 0.12);
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: end;
   justify-content: center;
   gap: 0.2rem;
-  text-transform: uppercase;
   font-weight: 700;
   letter-spacing: 0.1em;
-  color: var(--color-ink);
+  color: var(--color-sun);
+  padding-right: 3.5rem;
+  padding-top: 2rem;
+  font-size: 1.5rem;
+  line-height: 1.4rem;
+  aspect-ratio: 1/1;
 }
 
 .hero-star {
   z-index: 5;
-  grid-area: 1 / 1 / 9 / 6;
+  grid-area: 1 / 2 / 8 / 5;
   background-image: url("/shapes/star.png");
   background-size: contain;
   background-position: center;
@@ -514,7 +537,7 @@ button {
   }
 
   .hero-medal {
-    grid-area: 7 / 1 / 10 / 2;
+    grid-area: 7 / 1 / 11 / 4;
   }
 
   .hero-square-bottom {
@@ -522,15 +545,15 @@ button {
   }
 
   .hero-pill {
-    grid-area: 6 / 3 / 10 / 5;
+    grid-area: 6 / 4 / 11 / 5;
   }
 
   .hero-circle-date {
-    grid-area: 10 / 3 / 14 / 5;
+    grid-area: 9 / 3 / 13 / 5;
   }
 
   .hero-gear-orange {
-    grid-area: 8 / 2 / 13 / 5;
+    grid-area: 7 / 2 / 13 / 4;
   }
 
   .hero-star {

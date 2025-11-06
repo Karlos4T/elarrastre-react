@@ -24,7 +24,9 @@ export default function HeroBanner() {
     const ctx = gsap.context(() => {
       gsap.set(".hero-gear-blue", { x: 250 });
       gsap.set(".hero-square-left", { x: -20 });
-      gsap.set(".hero-campaign", { y: -40 });
+      gsap.set(".hero-campaign", { y: -20 });
+      gsap.set(".hero-medal", { x: -110 });
+      gsap.set(".hero-circle-date", { x: 50, y: 50 });
 
       const timeline = gsap.timeline({ defaults: { ease: "power3.out" } });
 
@@ -120,12 +122,12 @@ export default function HeroBanner() {
         repeat: -1,
       });
 
-      gsap.to(".hero-gear-orange", {
-        rotate: "-=360",
-        duration: 22,
-        ease: "linear",
-        repeat: -1,
-      });
+      // gsap.to(".hero-gear-orange", {
+      //   rotate: "-=360",
+      //   duration: 22,
+      //   ease: "linear",
+      //   repeat: -1,
+      // });
     }, bannerRef);
 
     return () => {
@@ -180,7 +182,6 @@ export default function HeroBanner() {
         </div>
 
         <div className="hero-actions hero-actions--poster">
-          <span className="hero-badge">Peña El Arrastre se pone el DELantal</span>
           <button type="button" className="button-hero" onClick={() => setIsModalOpen(true)}>
             ¡Quiero apuntarme!
           </button>
@@ -306,5 +307,7 @@ function DateCircle() {
 }
 
 function OrangeGear() {
-  return <div className="hero-gear hero-gear-orange" aria-hidden="true" />;
+  return <div className="hero-gear hero-gear-orange" aria-hidden="true" >
+    <img src="/shapes/logo-arrastre.svg" alt="" />
+  </div>;
 }
