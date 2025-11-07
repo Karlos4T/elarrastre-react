@@ -83,6 +83,8 @@ export default async function Home() {
   if (registrationsError) {
     console.error("No se pudo contar las inscripciones", registrationsError.message);
   }
+
+  console.log("results: ", registrationsCount);
   // hola
   return (
     <>
