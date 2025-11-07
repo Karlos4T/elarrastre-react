@@ -62,11 +62,11 @@ export default function AdminLoginPage() {
           <h1 className="text-3xl font-extrabold text-[var(--color-ink)]">
             Acceso administrador
           </h1>
-          <p className="text-sm leading-relaxed text-[var(--color-ink)]/80">
+          <p className="text-md leading-relaxed text-[var(--color-ink)]/80">
             Introduce tus credenciales para gestionar inscripciones, colaboradores y
             propuestas.
           </p>
-          <label className="flex flex-col gap-2 text-sm font-semibold text-[var(--color-ink)]">
+          <label className="flex flex-col gap-2 text-md font-semibold text-[var(--color-ink)]">
             Usuario
             <input
               type="text"
@@ -77,7 +77,7 @@ export default function AdminLoginPage() {
               className="rounded-[26px] border-2 border-[var(--color-ink)]/10 bg-white px-4 py-3 text-base font-medium text-[var(--color-ink)] outline-none transition focus:border-[var(--color-sky)] focus:ring-2 focus:ring-[var(--color-sky)]/40"
             />
           </label>
-          <label className="flex flex-col gap-2 text-sm font-semibold text-[var(--color-ink)]">
+          <label className="flex flex-col gap-2 text-md font-semibold text-[var(--color-ink)]">
             Contraseña
             <input
               type="password"
@@ -92,12 +92,12 @@ export default function AdminLoginPage() {
             {submitting ? "Accediendo..." : "Entrar"}
           </button>
           {state.success && (
-            <p className="rounded-xl border border-[var(--color-forest)]/20 bg-[var(--color-forest)]/10 px-4 py-2 text-sm font-semibold text-[var(--color-forest)]">
+            <p className="rounded-xl border border-[var(--color-forest)]/20 bg-[var(--color-forest)]/10 px-4 py-2 text-md font-semibold text-[var(--color-forest)]">
               {state.success}
             </p>
           )}
           {state.error && (
-            <p className="rounded-xl border border-red-200 bg-red-100 px-4 py-2 text-sm font-semibold text-red-600">
+            <p className="rounded-xl border border-red-200 bg-red-100 px-4 py-2 text-md font-semibold text-red-600">
               {state.error}
             </p>
           )}

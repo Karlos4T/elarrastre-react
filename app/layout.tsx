@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Baloo_2, League_Spartan, Space_Grotesk, Poppins } from "next/font/google";
 import "./globals.css";
+import ToastProvider from "./components/ToastProvider";
 
 const baloo = Baloo_2({
   variable: "--font-primary",
@@ -43,7 +44,7 @@ export default function RootLayout({
       <body
         className={`${baloo.variable} ${spaceGrotesk.variable} ${leagueSpartan.variable} ${poppins.variable}  antialiased`}
       >
-        {children}
+        <ToastProvider>{children}</ToastProvider>
       </body>
     </html>
   );

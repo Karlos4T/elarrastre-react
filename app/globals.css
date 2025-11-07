@@ -13,6 +13,9 @@
   --color-cream: #fff8ea;
   --color-neutral-100: #fbfaf5;
   --shadow-soft: 0 16px 40px rgba(27, 27, 31, 0.12);
+
+  scrollbar-color: red;
+  scrollbar-width: 100px;
 }
 
 html,
@@ -22,6 +25,8 @@ body {
   font-family: var(--font-primary);
   letter-spacing: 0.01em;
   overflow-x: hidden;
+  scrollbar-color: red;
+  scrollbar-width: 100px;
 }
 
 h1,
@@ -171,6 +176,11 @@ button {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
+.button-hero-blue {
+  background-color: var(--color-sky);
+
+}
+
 .button-hero:hover {
   transform: translateY(-4px);
   box-shadow: 0 22px 0 rgba(27, 27, 31, 0.24);
@@ -178,7 +188,6 @@ button {
 
 .hero-banner {
   position: relative;
-  overflow: hidden;
   background-color: var(--color-blush);
   display: grid;
   gap: clamp(1.4rem, 4vw, 2.4rem);
@@ -263,7 +272,7 @@ button {
 }
 
 .hero-gear-blue {
-  background-image: url("/shapes/gear.png");
+  background-image: url("/shapes/gear.svg");
   grid-area: 1 / 4 / 6 / 7;
   color: var(--color-sky);
 }
@@ -281,7 +290,6 @@ button {
 
 .hero-gear-orange img {
   width: 200px;
-  transform: translate(0) !important;
 }
 
 .hero-square {
@@ -320,19 +328,19 @@ button {
   letter-spacing: 0.1em;
   color: var(--color-sun);
   padding: 1rem;
-  padding-left: 7.5rem;
-  padding-top: 2rem;
+  padding-left: 10.5rem;
+  padding-top: 1rem;
 }
 
 .hero-medal .title {
-  line-height: 1.4rem;
-  font-size: 1.4rem;
+  line-height: 2rem;
+  font-size: 2rem;
   width: 120px;
 }
 
 .hero-medal .subtitle {
-  line-height: 0.9rem;
-  font-size: 1rem;
+  line-height: 1.5rem;
+  font-size: 1.6rem;
   width: 80px;
 }
 
@@ -357,8 +365,8 @@ button {
   color: var(--color-sun);
   padding-right: 3.5rem;
   padding-top: 2rem;
-  font-size: 1.5rem;
-  line-height: 1.4rem;
+  font-size: 3rem;
+  line-height: 3.2rem;
   aspect-ratio: 1/1;
 }
 
@@ -458,10 +466,6 @@ button {
   align-items: center;
 }
 
-.hero-actions--poster {
-  margin-top: clamp(1.5rem, 3vw, 2.5rem);
-}
-
 .hero-badge {
   display: inline-flex;
   align-items: center;
@@ -524,12 +528,12 @@ button {
 }
 
 .hero-action-button img {
-  height: 100px;
+  height: 150px;
 }
 
 .collab-header {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   gap: 1rem;
   align-items: flex-start;
 }
@@ -542,7 +546,7 @@ button {
 
 .collab-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   gap: 1.2rem;
 }
 
@@ -656,11 +660,64 @@ button {
   transition: transform 0.2s ease;
 }
 
+@keyframes toast-slide {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+
+  20% {
+    opacity: 1;
+    transform: translateY(0) scale(1.02);
+  }
+
+  60% {
+    transform: translateY(0) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+}
+
+.animate-toast-slide {
+  animation: toast-slide 0.6s ease forwards, toast-slide-hide 4.5s linear forwards;
+}
+
+@keyframes toast-slide-hide {
+
+  0%,
+  80% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+}
+
 .modal-close:hover {
   transform: scale(1.05);
 }
 
 @media (max-width: 768px) {
+
+  .hero-banner {
+    height: auto;
+  }
+
+  .hero-grid {
+    height: auto;
+  }
+
+  .hero-grid--mosaic {
+    gap: clamp(0.8rem, 2vw, 1.3rem);
+    height: auto;
+  }
+
   .shape-cloud {
     inset: auto auto 3rem -4rem;
     width: 14rem;
@@ -696,8 +753,23 @@ button {
     grid-area: 3 / 1 / 7 / 3;
   }
 
+
   .hero-medal {
+    padding-left: 7.5rem;
+    padding-top: 2rem;
     grid-area: 7 / 1 / 11 / 4;
+  }
+
+  .hero-medal .title {
+    line-height: 1.4rem;
+    font-size: 1.4rem;
+    width: 120px;
+  }
+
+  .hero-medal .subtitle {
+    line-height: 0.9rem;
+    font-size: 1rem;
+    width: 80px;
   }
 
   .hero-square-bottom {
@@ -710,6 +782,11 @@ button {
 
   .hero-circle-date {
     grid-area: 9 / 3 / 13 / 5;
+  }
+
+  .hero-circle-date {
+    font-size: 1.5rem;
+    line-height: 1.4rem;
   }
 
   .hero-gear-orange {
@@ -725,6 +802,10 @@ button {
     grid-area: 11 / 1 / 14 / 3;
   }
 
+  .hero-action-button img {
+    height: 100px;
+  }
+
   @media (max-width: 640px) {
     .hero-banner {
       gap: 1.8rem;
@@ -734,6 +815,7 @@ button {
 
   @media (max-width: 640px) {
     .collab-header {
+      flex-direction: column;
       align-items: center;
       text-align: center;
     }

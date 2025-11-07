@@ -1,13 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-
-type FormState = {
-  message: string | null;
-  error: string | null;
-};
-
-const initialState: FormState = { message: null, error: null };
+import { useToast } from "./ToastProvider";
 
 type RegistrationFormProps = {
   onSuccess?: () => void;
@@ -17,7 +11,7 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
   const [name, setName] = useState("");
   const [companionNames, setCompanionNames] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
-  const [state, setState] = useState<FormState>(initialState);
+  const { showToast } = useToast();
 
   const addCompanionField = () => {
     setCompanionNames((prev) => [...prev, ""]);
@@ -34,20 +28,19 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    setState(initialState);
     setSubmitting(true);
 
-    const names = [name.trim()];
-    companionNames.forEach((extra) => {
-      const trimmed = extra.trim();
-      if (trimmed) {
-        names.push(trimmed);
-      }
-    });
+    const names = [name, ...companionNames]
+      .map((value) => value.trim())
+      .filter(Boolean);
 
-    const payload = {
-      name: names.filter(Boolean).join(" + "),
-    };
+    if (names.length === 0) {
+      setSubmitting(false);
+      showToast({ message: "Añade al menos un nombre.", variant: "error" });
+      return;
+    }
+
+    const payload = { names };
 
     try {
       const response = await fetch("/api/registrations", {
@@ -63,14 +56,23 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
         throw new Error(data?.error || "No se pudo guardar tu inscripción.");
       }
 
+      const result = (await response.json().catch(() => [])) as Array<{ id: number; name: string }>;
+      const registeredCount = Array.isArray(result) ? result.length : names.length;
+
       setName("");
       setCompanionNames([]);
-      setState({ message: "¡Gracias por unirte!", error: null });
+      showToast({
+        message:
+          registeredCount > 1
+            ? `¡Gracias! Registramos ${registeredCount} personas.`
+            : "¡Gracias por unirte!",
+        variant: "success",
+      });
       onSuccess?.();
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "No se pudo completar la solicitud.";
-      setState({ message: null, error: message });
+      showToast({ message, variant: "error" });
     } finally {
       setSubmitting(false);
     }
@@ -84,10 +86,10 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
       <h2 className="text-2xl font-semibold text-[var(--color-ink)]">
         ¡Apúntate a esta <span className="highlight-text">ola solidaria!</span>
       </h2>
-      <p className="text-sm leading-relaxed text-[var(--color-ink)]/80">
+      <p className="text-md leading-relaxed text-[var(--color-ink)]/80">
         Deja tu nombre y súmate al movimiento <span className="accent-text">#ElArrastrePorLaELA</span>.
       </p>
-      <label className="flex flex-col gap-2 text-sm font-medium text-[var(--color-ink)]">
+      <label className="flex flex-col gap-2 text-md font-medium text-[var(--color-ink)]">
         Nombre completo
         <input
           type="text"
@@ -109,7 +111,7 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
                 value={companion}
                 onChange={(event) => updateCompanionName(index, event.target.value)}
                 placeholder={`Nombre extra ${index + 1}`}
-                className="flex-1 rounded-[24px] border-2 border-[var(--color-ink)]/10 bg-white px-3 py-2 text-sm font-medium text-[var(--color-ink)] outline-none transition focus:border-[var(--color-sky)] focus:ring-2 focus:ring-[var(--color-sky)]/30"
+                className="flex-1 rounded-[24px] border-2 border-[var(--color-ink)]/10 bg-white px-3 py-2 text-md font-medium text-[var(--color-ink)] outline-none transition focus:border-[var(--color-sky)] focus:ring-2 focus:ring-[var(--color-sky)]/30"
               />
               <button
                 type="button"
@@ -133,16 +135,6 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
       <button type="submit" disabled={submitting} className="button-primary w-full sm:w-auto">
         {submitting ? "Enviando..." : "Quiero participar"}
       </button>
-      {state.message && (
-        <p className="rounded-xl border border-[var(--color-forest)]/20 bg-[var(--color-forest)]/10 px-4 py-2 text-sm font-semibold text-[var(--color-forest)]">
-          {state.message}
-        </p>
-      )}
-      {state.error && (
-        <p className="rounded-xl border border-red-200 bg-red-100 px-4 py-2 text-sm font-semibold text-red-600">
-          {state.error}
-        </p>
-      )}
     </form>
   );
 }

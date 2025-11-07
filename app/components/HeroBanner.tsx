@@ -1,14 +1,11 @@
 "use client";
 
-import { MouseEvent, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import { gsap } from "gsap";
-import Link from "next/link";
-import RegistrationForm from "./RegistrationForm";
 import fitty from "fitty";
 
 export default function HeroBanner() {
   const bannerRef = useRef<HTMLDivElement | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   useEffect(() => {
     fitty(".hero-panel__text--campaign p", {
       minSize: 10,  // tamaño mínimo
@@ -23,7 +20,7 @@ export default function HeroBanner() {
 
     const ctx = gsap.context(() => {
       gsap.set(".hero-gear-blue", { x: 250 });
-      gsap.set(".hero-square-left", { x: -20 });
+      gsap.set(".hero-square-left", { x: -20, y: 20 });
       gsap.set(".hero-campaign", { y: -20 });
       gsap.set(".hero-medal", { x: -110 });
       gsap.set(".hero-circle-date", { x: 50, y: 50 });
@@ -145,37 +142,7 @@ export default function HeroBanner() {
     };
   }, []);
 
-  useEffect(() => {
-    if (typeof document === "undefined") {
-      return;
-    }
-
-    const body = document.body;
-
-    if (!isModalOpen) {
-      body.style.removeProperty("overflow");
-      return;
-    }
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setIsModalOpen(false);
-      }
-    };
-
-    body.style.overflow = "hidden";
-    if (typeof window !== "undefined") {
-      window.addEventListener("keydown", handleKeyDown);
-    }
-
-    return () => {
-      body.style.removeProperty("overflow");
-      if (typeof window !== "undefined") {
-        window.removeEventListener("keydown", handleKeyDown);
-      }
-    };
-  }, [isModalOpen]);
-
+  
   return (
     <>
       <header ref={bannerRef} className="hero-banner w-full">
@@ -191,62 +158,12 @@ export default function HeroBanner() {
           <HeroStarMessage />
           <ActionButton />
         </div>
-
-        <div className="hero-actions hero-actions--poster">
-          <button type="button" className="button-hero" onClick={() => setIsModalOpen(true)}>
-            ¡Quiero apuntarme!
-          </button>
-          <div className="hero-secondary-links">
-            <Link href="/admin">Panel admin</Link>
-            <Link href="/contacto">Enviar propuesta</Link>
-          </div>
-        </div>
       </header >
 
-      <RegistrationModal open={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </>
   );
 }
 
-type ModalProps = {
-  open: boolean;
-  onClose: () => void;
-};
-
-function RegistrationModal({ open, onClose }: ModalProps) {
-  if (!open) {
-    return null;
-  }
-
-  const handleOverlayClick = (event: MouseEvent<HTMLDivElement>) => {
-    if (event.target === event.currentTarget) {
-      onClose();
-    }
-  };
-
-  return (
-    <>
-      <div
-        role="dialog"
-        aria-modal="true"
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
-        onClick={handleOverlayClick}
-      >
-        <div className="relative w-full max-w-xl rounded-[34px] border-4 border-[var(--color-ink)] bg-white p-6 shadow-[0_18px_0_rgba(27,27,31,0.18)] sm:p-8">
-          <button
-            type="button"
-            aria-label="Cerrar ventana de registro"
-            className="absolute right-4 top-4 text-sm font-semibold text-[var(--color-ink)] transition hover:text-[var(--color-apricot)]"
-            onClick={onClose}
-          >
-            ✕
-          </button>
-          <RegistrationForm onSuccess={onClose} />
-        </div>
-      </div>
-    </>
-  );
-}
 
 function HeroStarMessage() {
   return (

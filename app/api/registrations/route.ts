@@ -7,22 +7,24 @@ function sanitize(value: unknown): string {
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const name = sanitize(body?.name);
+    const body = await request.json().catch(() => ({}));
+    const rawNames = Array.isArray(body?.names) ? body.names : [body?.name].filter(Boolean);
+    const names = rawNames.map(sanitize).filter(Boolean);
 
-    if (!name) {
+    if (names.length === 0) {
       return NextResponse.json(
         { error: "El nombre es obligatorio." },
         { status: 400 }
       );
     }
 
+    const rows = names.map((name) => ({ name }));
+
     const supabase = createSupabaseAdminClient();
     const { data, error } = await supabase
       .from("registrations")
-      .insert({ name })
-      .select("id, name, created_at")
-      .single();
+      .insert(rows)
+      .select("id, name, created_at");
 
     if (error) {
       console.error("Error guardando inscripción", error);
@@ -32,7 +34,7 @@ export async function POST(request: Request) {
       );
     }
 
-    return NextResponse.json(data, { status: 201 });
+    return NextResponse.json(data ?? [], { status: 201 });
   } catch (error) {
     console.error("Error procesando solicitud de inscripción", error);
     return NextResponse.json(

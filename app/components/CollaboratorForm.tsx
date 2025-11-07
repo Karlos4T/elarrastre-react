@@ -101,11 +101,11 @@ export default function CollaboratorForm() {
       <h3 className="text-xl font-semibold text-[var(--color-ink)]">
         Añadir colaborador
       </h3>
-      <p className="text-sm leading-relaxed text-[var(--color-ink)]/80">
+      <p className="text-md leading-relaxed text-[var(--color-ink)]/80">
         Completa este formulario para que aparezca en la lista pública. Sube una imagen en
         formato PNG o JPG.
       </p>
-      <label className="flex flex-col gap-2 text-sm font-medium text-[var(--color-ink)]">
+      <label className="flex flex-col gap-2 text-md font-medium text-[var(--color-ink)]">
         Nombre del colaborador
         <input
           type="text"
@@ -115,7 +115,7 @@ export default function CollaboratorForm() {
           className="rounded-[26px] border-2 border-[var(--color-ink)]/10 bg-white px-4 py-3 text-base font-medium text-[var(--color-ink)] outline-none transition focus:border-[var(--color-tangerine)] focus:ring-2 focus:ring-[var(--color-tangerine)]/40"
         />
       </label>
-      <label className="flex flex-col gap-2 text-sm font-medium text-[var(--color-ink)]">
+      <label className="flex flex-col gap-2 text-md font-medium text-[var(--color-ink)]">
         Imagen del colaborador
         <input
           type="file"
@@ -126,7 +126,7 @@ export default function CollaboratorForm() {
         />
       </label>
       {preview && (
-        <div className="flex items-center gap-3 rounded-2xl border-2 border-[var(--color-sky)]/30 bg-[var(--color-sky)]/10 p-3 text-sm text-[var(--color-ink)]">
+        <div className="flex items-center gap-3 rounded-2xl border-2 border-[var(--color-sky)]/30 bg-[var(--color-sky)]/10 p-3 text-md text-[var(--color-ink)]">
           <img
             src={preview}
             alt="Previsualización del colaborador"
@@ -139,12 +139,12 @@ export default function CollaboratorForm() {
         {submitting ? "Guardando..." : "Publicar colaborador"}
       </button>
       {state.message && (
-        <p className="rounded-xl border border-[var(--color-forest)]/20 bg-[var(--color-forest)]/10 px-4 py-2 text-sm font-semibold text-[var(--color-forest)]">
+        <p className="rounded-xl border border-[var(--color-forest)]/20 bg-[var(--color-forest)]/10 px-4 py-2 text-md font-semibold text-[var(--color-forest)]">
           {state.message}
         </p>
       )}
       {state.error && (
-        <p className="rounded-xl border border-red-200 bg-red-100 px-4 py-2 text-sm font-semibold text-red-600">
+        <p className="rounded-xl border border-red-200 bg-red-100 px-4 py-2 text-md font-semibold text-red-600">
           {state.error}
         </p>
       )}

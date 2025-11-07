@@ -63,47 +63,47 @@ export default function CollaboratorProposalForm() {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <div className="grid gap-2">
-        <label className="text-sm font-semibold text-[var(--color-ink)]">Nombre</label>
+        <label className="text-md font-semibold text-[var(--color-ink)]">Nombre</label>
         <input
           type="text"
           value={name}
           onChange={(event) => setName(event.target.value)}
           required
-          className="rounded-[24px] border-2 border-[var(--color-ink)]/10 bg-white px-4 py-2 text-sm font-medium text-[var(--color-ink)] outline-none transition focus:border-[var(--color-sky)] focus:ring-2 focus:ring-[var(--color-sky)]/30"
+          className="rounded-[24px] border-2 border-[var(--color-ink)]/10 bg-white px-4 py-2 text-md font-medium text-[var(--color-ink)] outline-none transition focus:border-[var(--color-sky)] focus:ring-2 focus:ring-[var(--color-sky)]/30"
         />
       </div>
 
       <div className="grid gap-2">
-        <label className="text-sm font-semibold text-[var(--color-ink)]">Email</label>
+        <label className="text-md font-semibold text-[var(--color-ink)]">Email</label>
         <input
           type="email"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
           required
-          className="rounded-[24px] border-2 border-[var(--color-ink)]/10 bg-white px-4 py-2 text-sm font-medium text-[var(--color-ink)] outline-none transition focus:border-[var(--color-sky)] focus:ring-2 focus:ring-[var(--color-sky)]/30"
+          className="rounded-[24px] border-2 border-[var(--color-ink)]/10 bg-white px-4 py-2 text-md font-medium text-[var(--color-ink)] outline-none transition focus:border-[var(--color-sky)] focus:ring-2 focus:ring-[var(--color-sky)]/30"
         />
       </div>
 
       <div className="grid gap-2">
-        <label className="text-sm font-semibold text-[var(--color-ink)]">
+        <label className="text-md font-semibold text-[var(--color-ink)]">
           Teléfono (opcional)
         </label>
         <input
           type="tel"
           value={phone}
           onChange={(event) => setPhone(event.target.value)}
-          className="rounded-[24px] border-2 border-[var(--color-ink)]/10 bg-white px-4 py-2 text-sm font-medium text-[var(--color-ink)] outline-none transition focus:border-[var(--color-sun)] focus:ring-2 focus:ring-[var(--color-sun)]/30"
+          className="rounded-[24px] border-2 border-[var(--color-ink)]/10 bg-white px-4 py-2 text-md font-medium text-[var(--color-ink)] outline-none transition focus:border-[var(--color-sun)] focus:ring-2 focus:ring-[var(--color-sun)]/30"
         />
       </div>
 
       <div className="grid gap-2">
-        <label className="text-sm font-semibold text-[var(--color-ink)]">Propuesta</label>
+        <label className="text-md font-semibold text-[var(--color-ink)]">Propuesta</label>
         <textarea
           value={proposal}
           onChange={(event) => setProposal(event.target.value)}
           required
           rows={4}
-          className="rounded-[24px] border-2 border-[var(--color-ink)]/10 bg-white px-4 py-2 text-sm font-medium text-[var(--color-ink)] outline-none transition focus:border-[var(--color-tangerine)] focus:ring-2 focus:ring-[var(--color-tangerine)]/30"
+          className="rounded-[24px] border-2 border-[var(--color-ink)]/10 bg-white px-4 py-2 text-md font-medium text-[var(--color-ink)] outline-none transition focus:border-[var(--color-tangerine)] focus:ring-2 focus:ring-[var(--color-tangerine)]/30"
         />
       </div>
 
@@ -112,12 +112,12 @@ export default function CollaboratorProposalForm() {
       </button>
 
       {state.message && (
-        <p className="rounded-xl border border-[var(--color-forest)]/20 bg-[var(--color-forest)]/10 px-4 py-2 text-sm font-semibold text-[var(--color-forest)]">
+        <p className="rounded-xl border border-[var(--color-forest)]/20 bg-[var(--color-forest)]/10 px-4 py-2 text-md font-semibold text-[var(--color-forest)]">
           {state.message}
         </p>
       )}
       {state.error && (
-        <p className="rounded-xl border border-red-200 bg-red-100 px-4 py-2 text-sm font-semibold text-red-600">
+        <p className="rounded-xl border border-red-200 bg-red-100 px-4 py-2 text-md font-semibold text-red-600">
           {state.error}
         </p>
       )}

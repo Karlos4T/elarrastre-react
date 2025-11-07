@@ -7,7 +7,7 @@ export default function ContactoPage() {
       <main className="relative mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-14 px-6 py-16 sm:px-10 lg:px-20">
         <div className="shape-cloud" />
         <header className="relative flex flex-col gap-6 rounded-[40px] border-4 border-[var(--color-ink)] bg-white p-8 shadow-[0_16px_0_rgba(27,27,31,0.08)] sm:p-12">
-          <Link href="/" className="text-sm font-semibold text-[var(--color-ink)]">
+          <Link href="/" className="text-md font-semibold text-[var(--color-ink)]">
             ← Volver a la plaza solidaria
           </Link>
           <h1 className="text-4xl font-extrabold leading-tight sm:text-5xl">
@@ -21,16 +21,16 @@ export default function ContactoPage() {
 
         <section className="grid gap-8 lg:grid-cols-[1.2fr_1fr] lg:items-start">
           <ContactForm />
-          <aside className="organic-card h-fit border-[var(--color-ink)]/0 p-6 text-sm text-[var(--color-ink)] sm:p-8">
+          <aside className="organic-card h-fit border-[var(--color-ink)]/0 p-6 text-md text-[var(--color-ink)] sm:p-8">
             <h2 className="text-xl font-semibold text-[var(--color-ink)]">
               Ideas que buscamos
             </h2>
-            <ul className="mt-4 space-y-2 text-sm font-medium">
+            <ul className="mt-4 space-y-2 text-md font-medium">
               <li>• Programación artística y musical con alma comunitaria.</li>
               <li>• Acciones participativas y talleres colaborativos.</li>
               <li>• Apoyo en comunicación, producción y logística comprometida.</li>
             </ul>
-            <p className="mt-4 text-sm font-medium">
+            <p className="mt-4 text-md font-medium">
               Si ya formas parte de la comunidad, usa este formulario para que nos
               organicemos contigo.
             </p>

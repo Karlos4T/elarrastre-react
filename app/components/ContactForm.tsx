@@ -65,10 +65,10 @@ export default function ContactForm() {
       <h2 className="text-2xl font-semibold text-[var(--color-ink)]">
         ¿Quieres colaborar? <span className="highlight-text">¡Te necesitamos!</span>
       </h2>
-      <p className="text-sm leading-relaxed text-[var(--color-ink)]/80">
+      <p className="text-md leading-relaxed text-[var(--color-ink)]/80">
         Déjanos tus datos de contacto y coordinamos cómo puedes aportar a El Arrastre.
       </p>
-      <label className="flex flex-col gap-2 text-sm font-medium text-[var(--color-ink)]">
+      <label className="flex flex-col gap-2 text-md font-medium text-[var(--color-ink)]">
         Nombre
         <input
           type="text"
@@ -79,7 +79,7 @@ export default function ContactForm() {
         />
       </label>
 
-      <label className="flex flex-col gap-2 text-sm font-medium text-[var(--color-ink)]">
+      <label className="flex flex-col gap-2 text-md font-medium text-[var(--color-ink)]">
         Email
         <input
           type="email"
@@ -89,7 +89,7 @@ export default function ContactForm() {
           className="rounded-[26px] border-2 border-[var(--color-ink)]/10 bg-white px-4 py-3 text-base font-medium text-[var(--color-ink)] outline-none transition focus:border-[var(--color-sky)] focus:ring-2 focus:ring-[var(--color-sky)]/40"
         />
       </label>
-      <label className="flex flex-col gap-2 text-sm font-medium text-[var(--color-ink)]">
+      <label className="flex flex-col gap-2 text-md font-medium text-[var(--color-ink)]">
         Teléfono (opcional)
         <input
           type="tel"
@@ -98,7 +98,7 @@ export default function ContactForm() {
           className="rounded-[26px] border-2 border-[var(--color-ink)]/10 bg-white px-4 py-3 text-base font-medium text-[var(--color-ink)] outline-none transition focus:border-[var(--color-sky)] focus:ring-2 focus:ring-[var(--color-sky)]/40"
         />
       </label>
-      <label className="flex flex-col gap-2 text-sm font-medium text-[var(--color-ink)]">
+      <label className="flex flex-col gap-2 text-md font-medium text-[var(--color-ink)]">
         Propuesta
         <textarea
           value={request}
@@ -112,12 +112,12 @@ export default function ContactForm() {
         {submitting ? "Enviando..." : "Quiero colaborar"}
       </button>
       {state.message && (
-        <p className="rounded-xl border border-[var(--color-forest)]/20 bg-[var(--color-forest)]/10 px-4 py-2 text-sm font-semibold text-[var(--color-forest)]">
+        <p className="rounded-xl border border-[var(--color-forest)]/20 bg-[var(--color-forest)]/10 px-4 py-2 text-md font-semibold text-[var(--color-forest)]">
           {state.message}
         </p>
       )}
       {state.error && (
-        <p className="rounded-xl border border-red-200 bg-red-100 px-4 py-2 text-sm font-semibold text-red-600">
+        <p className="rounded-xl border border-red-200 bg-red-100 px-4 py-2 text-md font-semibold text-red-600">
           {state.error}
         </p>
       )}

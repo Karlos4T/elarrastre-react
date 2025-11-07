@@ -27,6 +27,18 @@ type ContactRequestRow = {
   created_at: string;
 };
 
+type FaqRow = {
+  id: number;
+  question: string;
+  answer: string | null;
+  is_visible: boolean | null;
+  position: number | null;
+  asker_name: string | null;
+  asker_email: string | null;
+  created_at: string;
+};
+
+
 export default async function AdminPage() {
   const session = await getAdminSession();
   if (!session) {
@@ -34,7 +46,7 @@ export default async function AdminPage() {
   }
 
   const supabase = createSupabaseAdminClient();
-  const [registrationsResult, collaboratorsResult, contactRequestsResult] =
+  const [registrationsResult, collaboratorsResult, contactRequestsResult, faqsResult] =
     await Promise.all([
       supabase
         .from("registrations")
@@ -49,6 +61,13 @@ export default async function AdminPage() {
         .from("contact_requests")
         .select("id, name, mail, phone, request, created_at")
         .order("created_at", { ascending: false }),
+      supabase
+        .from("faqs")
+        .select(
+          "id, question, answer, is_visible, position, asker_name, asker_email, created_at"
+        )
+        .order("position", { ascending: true, nullsFirst: false })
+        .order("created_at", { ascending: true }),
     ]);
 
   if (registrationsResult.error) {
@@ -69,6 +88,12 @@ export default async function AdminPage() {
     );
   }
 
+  if (faqsResult.error) {
+    throw new Error(
+      `No se pudieron obtener las preguntas frecuentes: ${faqsResult.error.message}`
+    );
+  }
+
   const normalizeImage = (image: string | null) => {
     if (!image) return null;
     if (image.startsWith("\\x")) {
@@ -76,6 +101,20 @@ export default async function AdminPage() {
     }
     return image;
   };
+
+  const faqs = ((faqsResult.data as FaqRow[] | null) ?? [])
+    .map((item, index) => ({
+      id: item.id,
+      question: item.question,
+      answer: item.answer,
+      isVisible: Boolean(item.is_visible),
+      position: item.position ?? index + 1,
+      askerName: item.asker_name,
+      askerEmail: item.asker_email,
+      created_at: item.created_at,
+    }))
+    .sort((a, b) => (a.position ?? Infinity) - (b.position ?? Infinity));
+
 
   const collaborators = (collaboratorsResult.data ?? [])
     .map((item, index) => ({
@@ -98,6 +137,7 @@ export default async function AdminPage() {
           registrations={registrationsResult.data ?? []}
           collaborators={collaborators}
           contactRequests={contactRequestsResult.data ?? []}
+          faqs={faqs}
         />
       </main>
     </div>

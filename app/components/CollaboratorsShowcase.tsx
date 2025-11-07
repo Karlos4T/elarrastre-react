@@ -1,6 +1,8 @@
 "use client";
 
-import { CSSProperties, useMemo, useState } from "react";
+import { CSSProperties, MouseEvent, useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
+
 import CollaboratorProposalForm from "./CollaboratorProposalForm";
 
 type Collaborator = {
@@ -38,21 +40,25 @@ export default function CollaboratorsShowcase({ collaborators }: Props) {
   return (
     <>
       <div className="reveal-on-scroll flex flex-col gap-10">
-        <div className="collab-header">
-          <h2 className="text-3xl font-extrabold text-[var(--color-ink)]">Colaboradores</h2>
-          <p className="max-w-2xl text-sm font-medium text-[var(--color-ink)]/70">
-            Artistas, vecinas, asociaciones y colectivos que se arrastran por la causa. Si
-            quieres sumarte, cuéntanos tu propuesta.
-          </p>
+        <div className="collab-header flex">
+          <div className="flex flex-col">
+            <h2 className="text-3xl font-extrabold text-[var(--color-ink)]">Colaboradores</h2>
+            <p className="max-w-5xl text-lg font-medium text-[var(--color-ink)]/70">
+              Artistas, vecinas, asociaciones y colectivos que se arrastran por la causa. Si
+              quieres sumarte, cuéntanos tu propuesta.
+            </p>
+          </div>
           <div className="collab-header-actions">
             <button onClick={() => setOpen(true)} className="button-secondary">
-              Quiero colaborar
+              <b>
+                ¡QUIERO COLABORAR!
+              </b>
             </button>
           </div>
         </div>
 
         {decorated.length === 0 ? (
-          <p className="rounded-xl border-2 border-dashed border-[var(--color-ink)]/20 px-6 py-12 text-center text-sm font-medium text-[var(--color-ink)]/60">
+          <p className="rounded-xl border-2 border-dashed border-[var(--color-ink)]/20 px-6 py-12 text-center text-md font-medium text-[var(--color-ink)]/60">
             Todavía no hay colaboradores publicados. ¡Sé la primera persona en sumarte!
           </p>
         ) : (
@@ -90,32 +96,77 @@ export default function CollaboratorsShowcase({ collaborators }: Props) {
         )}
       </div>
 
-      {open ? (
-        <div
-          className="modal-backdrop"
-          role="dialog"
-          aria-modal="true"
-          onClick={() => setOpen(false)}
-        >
-          <div className="modal-card" onClick={(event) => event.stopPropagation()}>
-            <button
-              type="button"
-              className="modal-close"
-              aria-label="Cerrar"
-              onClick={() => setOpen(false)}
-            >
-              ×
-            </button>
-            <h3 className="text-2xl font-extrabold text-[var(--color-ink)]">
-              Comparte tu propuesta
-            </h3>
-            <p className="mb-4 text-sm font-medium text-[var(--color-ink)]/70">
-              Cuéntanos cómo quieres colaborar y te contactaremos enseguida.
-            </p>
-            <CollaboratorProposalForm />
-          </div>
-        </div>
-      ) : null}
+      <CollaboratorModal open={open} onClose={() => setOpen(false)} />
     </>
   );
+}
+
+type ModalProps = {
+  open: boolean;
+  onClose: () => void;
+};
+
+function CollaboratorModal({ open, onClose }: ModalProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+
+  useEffect(() => {
+    if (!open || typeof window === "undefined") {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [open, onClose]);
+
+  if (!open || typeof document === "undefined" || !mounted) {
+    return null;
+  }
+
+  const handleOverlayClick = (event: MouseEvent<HTMLDivElement>) => {
+    if (event.target === event.currentTarget) {
+      onClose();
+    }
+  };
+
+  const modal = (
+    <div
+      className="modal-backdrop"
+      role="dialog"
+      aria-modal="true"
+      onClick={handleOverlayClick}
+    >
+      <div className="modal-card max-w-2xl" onClick={(event) => event.stopPropagation()}>
+        <button
+          type="button"
+          className="modal-close"
+          aria-label="Cerrar"
+          onClick={onClose}
+        >
+          ×
+        </button>
+        <h3 className="text-3xl font-extrabold text-[var(--color-ink)]">
+          Comparte tu propuesta
+        </h3>
+        <p className="mb-4 text-base font-medium text-[var(--color-ink)]/70">
+          Cuéntanos cómo quieres colaborar y te contactaremos enseguida.
+        </p>
+        <CollaboratorProposalForm />
+      </div>
+    </div>
+  );
+
+  return createPortal(modal, document.body);
 }

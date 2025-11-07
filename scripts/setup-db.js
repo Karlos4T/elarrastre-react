@@ -49,6 +49,37 @@ async function setup() {
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
     `,
+    `
+      CREATE TABLE IF NOT EXISTS faqs (
+        id BIGSERIAL PRIMARY KEY,
+        question TEXT NOT NULL,
+        answer TEXT,
+        is_visible BOOLEAN NOT NULL DEFAULT FALSE,
+        position INTEGER NOT NULL DEFAULT 0,
+        asker_name VARCHAR(255),
+        asker_email VARCHAR(255),
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `,
+    `
+      CREATE OR REPLACE FUNCTION set_faqs_updated_at()
+      RETURNS TRIGGER AS $$
+      BEGIN
+        NEW.updated_at = NOW();
+        RETURN NEW;
+      END;
+      $$ LANGUAGE plpgsql;
+    `,
+    `
+      DROP TRIGGER IF EXISTS set_faqs_updated_at_trigger ON faqs;
+    `,
+    `
+      CREATE TRIGGER set_faqs_updated_at_trigger
+      BEFORE UPDATE ON faqs
+      FOR EACH ROW
+      EXECUTE PROCEDURE set_faqs_updated_at();
+    `,
   ];
 
   try {
