@@ -1,6 +1,6 @@
 "use client";
 
-import { Save, Trash2 } from "lucide-react";
+import { ChevronDown, GripVertical, Save, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { DragEvent, FormEvent, useCallback, useEffect, useMemo, useState } from "react";
@@ -90,6 +90,7 @@ export default function AdminDashboard({
   }, [initialRegistrations]);
 
   const [collaboratorList, setCollaboratorList] = useState(collaborators);
+  const [collaboratorOrderDirty, setCollaboratorOrderDirty] = useState(false);
   const [collaboratorModal, setCollaboratorModal] = useState<{
     open: boolean;
     collaborator: Collaborator | null;
@@ -116,8 +117,15 @@ export default function AdminDashboard({
   const [faqSavingId, setFaqSavingId] = useState<number | null>(null);
   const [faqDeletingId, setFaqDeletingId] = useState<number | null>(null);
   const [draggedFaqId, setDraggedFaqId] = useState<number | null>(null);
+  const [faqOrderDirty, setFaqOrderDirty] = useState(false);
   const [faqOrderSaving, setFaqOrderSaving] = useState(false);
   const [faqOrderError, setFaqOrderError] = useState<string | null>(null);
+  const [activeFaqId, setActiveFaqId] = useState<number | null>(null);
+  const getInitialNewFaq = () => ({ question: "", answer: "", isVisible: false });
+  const [newFaq, setNewFaq] = useState(() => getInitialNewFaq());
+  const [creatingFaq, setCreatingFaq] = useState(false);
+  const [createFaqError, setCreateFaqError] = useState<string | null>(null);
+  const [showNewFaqForm, setShowNewFaqForm] = useState(false);
   const [activeTab, setActiveTab] = useState<SectionKey>("registrations");
   const initialTimestamp = new Date(0).toISOString();
   const [lastSeen, setLastSeen] = useState<Record<SectionKey, string>>({
@@ -131,12 +139,18 @@ export default function AdminDashboard({
   useEffect(() => {
     setCollaboratorList(collaborators);
     setOrderError(null);
+    setCollaboratorOrderDirty(false);
   }, [collaborators]);
 
   useEffect(() => {
     setFaqList(faqs);
     setFaqDrafts(buildFaqDrafts(faqs));
     setFaqOrderError(null);
+    setFaqOrderDirty(false);
+    setActiveFaqId(null);
+    setNewFaq(getInitialNewFaq());
+    setCreateFaqError(null);
+    setShowNewFaqForm(false);
   }, [faqs]);
 
   useEffect(() => {
@@ -316,7 +330,11 @@ export default function AdminDashboard({
     const updated = [...list];
     const sourceIndex = updated.findIndex((item) => item.id === sourceId);
     const targetIndex = updated.findIndex((item) => item.id === targetId);
-    if (sourceIndex === -1 || targetIndex === -1) {
+    if (
+      sourceIndex === -1 ||
+      targetIndex === -1 ||
+      sourceIndex === targetIndex
+    ) {
       return list;
     }
     const [moved] = updated.splice(sourceIndex, 1);
@@ -350,6 +368,7 @@ export default function AdminDashboard({
       setActionState({ message: "Orden de colaboradores actualizado.", error: null });
       notify("Orden de colaboradores actualizado.", "success");
       router.refresh();
+      setCollaboratorOrderDirty(false);
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "No se pudo guardar el orden.";
@@ -364,31 +383,52 @@ export default function AdminDashboard({
     setDraggedCollaboratorId(id);
   };
 
-  const handleDragOver = (event: DragEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-  };
-
-  const handleDrop = (
-    event: DragEvent<HTMLButtonElement>,
+  const handleDragOver = (
+    event: DragEvent<HTMLLIElement>,
     targetId: number
   ) => {
     event.preventDefault();
     if (draggedCollaboratorId === null || draggedCollaboratorId === targetId) {
-      setDraggedCollaboratorId(null);
       return;
     }
-    const reordered = reorderList(collaboratorList, draggedCollaboratorId, targetId);
-    if (reordered === collaboratorList) {
-      setDraggedCollaboratorId(null);
+    setCollaboratorList((prev) => {
+      const reordered = reorderList(prev, draggedCollaboratorId, targetId);
+      if (reordered === prev) {
+        return prev;
+      }
+      setCollaboratorOrderDirty(true);
+      return reordered;
+    });
+  };
+
+  const handleDrop = (
+    event: DragEvent<HTMLLIElement>,
+    targetId: number
+  ) => {
+    event.preventDefault();
+    if (draggedCollaboratorId === null) {
       return;
     }
-    setCollaboratorList(reordered);
-    persistCollaboratorOrder(reordered);
+    setCollaboratorList((prev) => {
+      const reordered = reorderList(prev, draggedCollaboratorId, targetId);
+      if (reordered === prev) {
+        return prev;
+      }
+      setCollaboratorOrderDirty(true);
+      return reordered;
+    });
     setDraggedCollaboratorId(null);
   };
 
   const handleDragEnd = () => {
     setDraggedCollaboratorId(null);
+  };
+
+  const handleCollaboratorOrderSave = () => {
+    if (!collaboratorOrderDirty || orderSaving) {
+      return;
+    }
+    persistCollaboratorOrder(collaboratorList);
   };
 
   const handleCollaboratorClick = (collaborator: Collaborator) => {
@@ -497,6 +537,76 @@ export default function AdminDashboard({
     });
   };
 
+  const handleNewFaqFieldChange = (
+    field: "question" | "answer" | "isVisible",
+    value: string | boolean
+  ) => {
+    setNewFaq((prev) => ({
+      ...prev,
+      [field]: field === "isVisible" ? Boolean(value) : (value as string),
+    }));
+  };
+
+  const handleCreateFaq = async () => {
+    const question = newFaq.question.trim();
+    const answer = newFaq.answer.trim();
+    if (!question) {
+      setCreateFaqError("La pregunta no puede estar vacía.");
+      return;
+    }
+    if (newFaq.isVisible && !answer) {
+      setCreateFaqError("Necesitas una respuesta antes de hacerla visible.");
+      return;
+    }
+    setCreatingFaq(true);
+    setCreateFaqError(null);
+    try {
+      const response = await fetch("/api/faqs", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          question,
+          answer: answer || null,
+          isVisible: newFaq.isVisible,
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data?.error || "No se pudo crear la pregunta.");
+      }
+
+      const payload = await response.json();
+      const normalized = normalizeFaq(payload);
+      setFaqList((prev) =>
+        [...prev, normalized].sort(
+          (a, b) => (a.position ?? Infinity) - (b.position ?? Infinity)
+        )
+      );
+      setFaqDrafts((prev) => ({
+        ...prev,
+        [normalized.id]: {
+          question: normalized.question,
+          answer: normalized.answer ?? "",
+          isVisible: normalized.isVisible,
+        },
+      }));
+      setNewFaq(getInitialNewFaq());
+      setShowNewFaqForm(false);
+      setActionState({ message: "Pregunta creada.", error: null });
+      notify("Pregunta creada.", "success");
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "No se pudo crear la pregunta.";
+      setCreateFaqError(message);
+      notify(message, "error");
+    } finally {
+      setCreatingFaq(false);
+    }
+  };
+
   const handleFaqSave = async (id: number) => {
     const draft = faqDrafts[id];
     if (!draft) {
@@ -592,6 +702,7 @@ export default function AdminDashboard({
       }
 
       setFaqList((prev) => prev.filter((item) => item.id !== id));
+      setActiveFaqId((current) => (current === id ? null : current));
       setFaqDrafts((prev) => {
         const next = { ...prev };
         delete next[id];
@@ -613,7 +724,11 @@ export default function AdminDashboard({
     const updated = [...list];
     const sourceIndex = updated.findIndex((item) => item.id === sourceId);
     const targetIndex = updated.findIndex((item) => item.id === targetId);
-    if (sourceIndex === -1 || targetIndex === -1) {
+    if (
+      sourceIndex === -1 ||
+      targetIndex === -1 ||
+      sourceIndex === targetIndex
+    ) {
       return list;
     }
     const [moved] = updated.splice(sourceIndex, 1);
@@ -647,6 +762,7 @@ export default function AdminDashboard({
       router.refresh();
       setActionState({ message: "Orden de preguntas actualizado.", error: null });
       notify("Orden de preguntas actualizado.", "success");
+      setFaqOrderDirty(false);
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "No se pudo guardar el orden.";
@@ -661,31 +777,56 @@ export default function AdminDashboard({
     setDraggedFaqId(id);
   };
 
-  const handleFaqDragOver = (event: DragEvent<HTMLElement>) => {
-    event.preventDefault();
-  };
-
-  const handleFaqDrop = (
-    event: DragEvent<HTMLElement>,
+  const handleFaqDragOver = (
+    event: DragEvent<HTMLLIElement>,
     targetId: number
   ) => {
     event.preventDefault();
     if (draggedFaqId === null || draggedFaqId === targetId) {
-      setDraggedFaqId(null);
       return;
     }
-    const reordered = reorderFaqList(faqList, draggedFaqId, targetId);
-    if (reordered === faqList) {
-      setDraggedFaqId(null);
+    setFaqList((prev) => {
+      const reordered = reorderFaqList(prev, draggedFaqId, targetId);
+      if (reordered === prev) {
+        return prev;
+      }
+      setFaqOrderDirty(true);
+      return reordered;
+    });
+  };
+
+  const handleFaqDrop = (
+    event: DragEvent<HTMLLIElement>,
+    targetId: number
+  ) => {
+    event.preventDefault();
+    if (draggedFaqId === null) {
       return;
     }
-    setFaqList(reordered);
-    persistFaqOrder(reordered);
+    setFaqList((prev) => {
+      const reordered = reorderFaqList(prev, draggedFaqId, targetId);
+      if (reordered === prev) {
+        return prev;
+      }
+      setFaqOrderDirty(true);
+      return reordered;
+    });
     setDraggedFaqId(null);
   };
 
   const handleFaqDragEnd = () => {
     setDraggedFaqId(null);
+  };
+
+  const handleFaqOrderSave = () => {
+    if (!faqOrderDirty || faqOrderSaving) {
+      return;
+    }
+    persistFaqOrder(faqList);
+  };
+
+  const toggleFaqCard = (id: number) => {
+    setActiveFaqId((current) => (current === id ? null : id));
   };
 
   const requestDeleteContact = (contact: ContactRequest) => {
@@ -919,14 +1060,29 @@ export default function AdminDashboard({
               Toca una card para editarla o usa el botón para añadir un nuevo colaborador.
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => openCollaboratorModal()}
-            className="button-secondary w-full rounded-full px-6 py-3 text-base sm:w-auto"
-          >
-            Añadir colaborador
-          </button>
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+            <button
+              type="button"
+              onClick={handleCollaboratorOrderSave}
+              disabled={!collaboratorOrderDirty || orderSaving}
+              className="w-full rounded-full bg-[var(--color-sky)] px-6 py-3 text-base font-semibold text-white shadow transition hover:bg-[var(--color-sky)]/80 disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto"
+            >
+              {orderSaving ? "Guardando..." : "Guardar cambios"}
+            </button>
+            <button
+              type="button"
+              onClick={() => openCollaboratorModal()}
+              className="button-secondary w-full rounded-full px-6 py-3 text-base sm:w-auto"
+            >
+              Añadir colaborador
+            </button>
+          </div>
         </div>
+        {collaboratorOrderDirty && !orderSaving && (
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-ink)]/70">
+            Tienes cambios de orden sin guardar.
+          </p>
+        )}
         {orderSaving && (
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-ink)]/60">
             Guardando nuevo orden...
@@ -942,17 +1098,36 @@ export default function AdminDashboard({
         ) : (
           <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {collaboratorList.map((collaborator) => (
-              <li key={collaborator.id}>
+              <li
+                key={collaborator.id}
+                onDragOver={(event) => handleDragOver(event, collaborator.id)}
+                onDrop={(event) => handleDrop(event, collaborator.id)}
+              >
                 <button
                   type="button"
-                  draggable
-                  onDragStart={() => handleDragStart(collaborator.id)}
-                  onDragOver={handleDragOver}
-                  onDrop={(event) => handleDrop(event, collaborator.id)}
-                  onDragEnd={handleDragEnd}
                   onClick={() => handleCollaboratorClick(collaborator)}
-                  className="flex w-full flex-col items-center gap-3 rounded-[32px] border-2 border-[var(--color-ink)]/10 bg-white p-4 text-center shadow-[0_10px_0_rgba(27,27,31,0.05)] transition hover:-translate-y-1 hover:shadow-[0_16px_0_rgba(27,27,31,0.08)]"
+                  className="relative flex w-full flex-col items-center gap-3 rounded-[32px] border-2 border-[var(--color-ink)]/10 bg-white p-4 text-center shadow-[0_10px_0_rgba(27,27,31,0.05)] transition hover:-translate-y-1 hover:shadow-[0_16px_0_rgba(27,27,31,0.08)]"
                 >
+                  <span
+                    className="absolute right-3 top-3 inline-flex h-8 w-8 cursor-grab items-center justify-center rounded-full border border-[var(--color-ink)]/15 bg-white/90 text-[var(--color-ink)]/50 shadow-sm transition hover:text-[var(--color-ink)] active:cursor-grabbing"
+                    draggable
+                    aria-label="Reordenar colaborador"
+                    onMouseDown={(event) => event.stopPropagation()}
+                    onClick={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                    }}
+                    onDragStart={(event) => {
+                      event.stopPropagation();
+                      handleDragStart(collaborator.id);
+                    }}
+                    onDragEnd={(event) => {
+                      event.stopPropagation();
+                      handleDragEnd();
+                    }}
+                  >
+                    <GripVertical size={16} />
+                  </span>
                   <div className="h-16 w-16 overflow-hidden rounded-full border-2 border-[var(--color-sun)] bg-[var(--color-sun)]/30">
                     {collaborator.imageSrc ? (
                       <img
@@ -1002,14 +1177,107 @@ export default function AdminDashboard({
         id="admin-faqs"
         className={`${activeTab === "faqs" ? "block" : "hidden"} admin-section organic-card grid gap-6 border-[var(--color-ink)]/0 p-6 sm:p-8 reveal-on-scroll`}
       >
-        <div className="flex flex-col gap-1">
-          <h2 className="text-xl font-semibold text-[var(--color-ink)]">
-            Preguntas frecuentes
-          </h2>
-          <p className="text-md font-medium text-[var(--color-ink)]/70">
-            Edita, responde y decide cuáles son visibles en la landing.
-          </p>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-1">
+            <h2 className="text-xl font-semibold text-[var(--color-ink)]">
+              Preguntas frecuentes
+            </h2>
+            <p className="text-md font-medium text-[var(--color-ink)]/70">
+              Edita, responde y decide cuáles son visibles en la landing.
+            </p>
+          </div>
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+            <button
+              type="button"
+              onClick={() => setShowNewFaqForm((prev) => !prev)}
+              className="w-full rounded-full border-2 border-[var(--color-ink)]/15 px-6 py-3 text-base font-semibold text-[var(--color-ink)] shadow transition hover:border-[var(--color-sky)]/50 sm:w-auto"
+            >
+              {showNewFaqForm ? "Cerrar nueva pregunta" : "Nueva pregunta"}
+            </button>
+            <button
+              type="button"
+              onClick={handleFaqOrderSave}
+              disabled={!faqOrderDirty || faqOrderSaving}
+              className="w-full rounded-full bg-[var(--color-sun)] px-6 py-3 text-base font-semibold text-[var(--color-ink)] shadow transition hover:bg-[var(--color-sun)]/80 disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto"
+            >
+              {faqOrderSaving ? "Guardando..." : "Guardar cambios"}
+            </button>
+          </div>
         </div>
+        {showNewFaqForm && (
+          <div className="rounded-[24px] border-2 border-dashed border-[var(--color-ink)]/20 bg-white p-4 shadow-[0_10px_0_rgba(27,27,31,0.05)]">
+            <div className="grid gap-4">
+              <div className="grid gap-2">
+                <label className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-ink)]/60">
+                  Pregunta
+                </label>
+                <textarea
+                  value={newFaq.question}
+                  onChange={(event) =>
+                    handleNewFaqFieldChange("question", event.target.value)
+                  }
+                  rows={2}
+                  className="rounded-[24px] border-2 border-[var(--color-ink)]/10 bg-white px-3 py-2 text-md font-medium text-[var(--color-ink)] outline-none transition focus:border-[var(--color-sky)] focus:ring-2 focus:ring-[var(--color-sky)]/30"
+                  placeholder="¿Cuál es tu pregunta?"
+                />
+              </div>
+              <div className="grid gap-2">
+                <label className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-ink)]/60">
+                  Respuesta (opcional)
+                </label>
+                <textarea
+                  value={newFaq.answer}
+                  onChange={(event) =>
+                    handleNewFaqFieldChange("answer", event.target.value)
+                  }
+                  rows={3}
+                  className="rounded-[24px] border-2 border-[var(--color-ink)]/10 bg-white px-3 py-2 text-md font-medium text-[var(--color-ink)] outline-none transition focus:border-[var(--color-sun)] focus:ring-2 focus:ring-[var(--color-sun)]/30"
+                  placeholder="Añade la respuesta si ya la tienes."
+                />
+              </div>
+              <label className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--color-ink)]">
+                <input
+                  type="checkbox"
+                  checked={newFaq.isVisible}
+                  onChange={(event) =>
+                    handleNewFaqFieldChange("isVisible", event.target.checked)
+                  }
+                  className="h-4 w-4 rounded border-[var(--color-ink)]/40"
+                />
+                Visible en la web
+              </label>
+              {createFaqError && (
+                <p className="text-sm font-semibold text-red-600">{createFaqError}</p>
+              )}
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={handleCreateFaq}
+                  disabled={creatingFaq}
+                  className="rounded-full bg-[var(--color-ink)] px-6 py-2 text-sm font-semibold text-white shadow transition hover:bg-[var(--color-ink)]/80 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {creatingFaq ? "Creando..." : "Publicar pregunta"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setNewFaq(getInitialNewFaq());
+                    setCreateFaqError(null);
+                    setShowNewFaqForm(false);
+                  }}
+                  className="rounded-full border-2 border-[var(--color-ink)]/15 px-6 py-2 text-sm font-semibold text-[var(--color-ink)] transition hover:border-[var(--color-ink)]/40"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        {faqOrderDirty && !faqOrderSaving && (
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-ink)]/70">
+            Tienes cambios de orden sin guardar.
+          </p>
+        )}
         {faqOrderSaving && (
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-ink)]/60">
             Guardando nuevo orden...
@@ -1037,84 +1305,145 @@ export default function AdminDashboard({
                 draft.isVisible !== faq.isVisible;
               const busy = faqSavingId === faq.id;
               const deleting = faqDeletingId === faq.id;
+              const isActive = activeFaqId === faq.id;
+              const answerPreview = draft.answer.trim()
+                ? `${draft.answer.trim().slice(0, 120)}${
+                    draft.answer.trim().length > 120 ? "…" : ""
+                  }`
+                : "Sin respuesta todavía.";
+              const visibilityLabel = draft.isVisible
+                ? "Visible en la web"
+                : "Oculta en la web";
+              const visibilityBadgeClass = draft.isVisible
+                ? "bg-[var(--color-sky)]/20 text-[var(--color-sky)]"
+                : "bg-[var(--color-ink)]/10 text-[var(--color-ink)]/70";
 
               return (
                 <li
                   key={faq.id}
-                  draggable
-                  onDragStart={() => handleFaqDragStart(faq.id)}
-                  onDragOver={handleFaqDragOver}
+                  onDragOver={(event) => handleFaqDragOver(event, faq.id)}
                   onDrop={(event) => handleFaqDrop(event, faq.id)}
-                  onDragEnd={handleFaqDragEnd}
-                  className="grid gap-4 rounded-[32px] border-2 border-[var(--color-ink)]/10 bg-white p-4 shadow-[0_10px_0_rgba(27,27,31,0.05)]"
+                  className="relative rounded-[24px] border-2 border-[var(--color-ink)]/10 bg-white p-4 shadow-[0_10px_0_rgba(27,27,31,0.05)]"
                 >
-                  <div className="grid gap-2">
-                    <label className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-ink)]/60">
-                      Pregunta
-                    </label>
-                    <textarea
-                      value={draft.question}
-                      onChange={(event) =>
-                        handleFaqDraftChange(faq.id, "question", event.target.value)
-                      }
-                      rows={2}
-                      className="rounded-[24px] border-2 border-[var(--color-ink)]/10 bg-white px-3 py-2 text-md font-medium text-[var(--color-ink)] outline-none transition focus:border-[var(--color-sky)] focus:ring-2 focus:ring-[var(--color-sky)]/30"
-                    />
+                  <span
+                    className="absolute right-3 top-3 inline-flex h-8 w-8 cursor-grab items-center justify-center rounded-full border border-[var(--color-ink)]/15 bg-white/90 text-[var(--color-ink)]/50 shadow-sm transition hover:text-[var(--color-ink)] active:cursor-grabbing"
+                    draggable
+                    aria-label="Reordenar pregunta"
+                    onMouseDown={(event) => event.stopPropagation()}
+                    onDragStart={(event) => {
+                      event.stopPropagation();
+                      handleFaqDragStart(faq.id);
+                    }}
+                    onDragEnd={(event) => {
+                      event.stopPropagation();
+                      handleFaqDragEnd();
+                    }}
+                  >
+                    <GripVertical size={16} />
+                  </span>
+                  <div className="pr-10">
+                    <button
+                      type="button"
+                      onClick={() => toggleFaqCard(faq.id)}
+                      aria-expanded={isActive}
+                      className={`w-full rounded-2xl border border-transparent bg-[var(--color-ink)]/5 px-4 py-3 text-left transition hover:border-[var(--color-sky)]/40 ${
+                        isActive ? "border-[var(--color-sky)]/60 shadow-inner" : ""
+                      }`}
+                    >
+                      <p className="text-base font-semibold text-[var(--color-ink)]">
+                        {draft.question.trim() || "Sin pregunta"}
+                      </p>
+                      <p className="mt-1 text-sm text-[var(--color-ink)]/70">
+                        {answerPreview}
+                      </p>
+                      <div className="mt-3 flex flex-wrap items-center gap-3">
+                        <span
+                          className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${visibilityBadgeClass}`}
+                        >
+                          {visibilityLabel}
+                        </span>
+                        <span className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-ink)]/70">
+                          {isActive ? "Cerrar" : "Editar"}
+                          <ChevronDown
+                            size={14}
+                            className={`transition ${isActive ? "rotate-180" : ""}`}
+                            aria-hidden="true"
+                          />
+                        </span>
+                      </div>
+                    </button>
                   </div>
-                  <div className="grid gap-2">
-                    <label className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-ink)]/60">
-                      Respuesta
-                    </label>
-                    <textarea
-                      value={draft.answer}
-                      onChange={(event) =>
-                        handleFaqDraftChange(faq.id, "answer", event.target.value)
-                      }
-                      rows={4}
-                      className="rounded-[24px] border-2 border-[var(--color-ink)]/10 bg-white px-3 py-2 text-md font-medium text-[var(--color-ink)] outline-none transition focus:border-[var(--color-sun)] focus:ring-2 focus:ring-[var(--color-sun)]/30"
-                    />
-                  </div>
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <label className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--color-ink)]">
-                      <input
-                        type="checkbox"
-                        checked={draft.isVisible}
-                        onChange={(event) =>
-                          handleFaqDraftChange(faq.id, "isVisible", event.target.checked)
-                        }
-                        className="h-4 w-4 rounded border-[var(--color-ink)]/40"
-                      />
-                      Visible en la web
-                    </label>
-                    <div className="flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        onClick={() => handleFaqSave(faq.id)}
-                        disabled={!hasChanges || busy}
-                        className="inline-flex items-center gap-2 rounded-full border-2 border-[var(--color-ink)]/20 px-4 py-2 text-sm font-semibold text-[var(--color-ink)] transition hover:bg-[var(--color-sky)]/20 disabled:cursor-not-allowed disabled:opacity-40"
-                      >
-                        <Save size={16} /> Guardar
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleFaqDelete(faq.id)}
-                        disabled={deleting}
-                        className="inline-flex items-center gap-2 rounded-full border-2 border-red-300 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
-                      >
-                        <Trash2 size={16} /> Eliminar
-                      </button>
+                  {isActive && (
+                    <div className="mt-4 grid gap-4">
+                      <div className="grid gap-2">
+                        <label className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-ink)]/60">
+                          Pregunta
+                        </label>
+                        <textarea
+                          value={draft.question}
+                          onChange={(event) =>
+                            handleFaqDraftChange(faq.id, "question", event.target.value)
+                          }
+                          rows={2}
+                          className="rounded-[24px] border-2 border-[var(--color-ink)]/10 bg-white px-3 py-2 text-md font-medium text-[var(--color-ink)] outline-none transition focus:border-[var(--color-sky)] focus:ring-2 focus:ring-[var(--color-sky)]/30"
+                        />
+                      </div>
+                      <div className="grid gap-2">
+                        <label className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-ink)]/60">
+                          Respuesta
+                        </label>
+                        <textarea
+                          value={draft.answer}
+                          onChange={(event) =>
+                            handleFaqDraftChange(faq.id, "answer", event.target.value)
+                          }
+                          rows={4}
+                          className="rounded-[24px] border-2 border-[var(--color-ink)]/10 bg-white px-3 py-2 text-md font-medium text-[var(--color-ink)] outline-none transition focus:border-[var(--color-sun)] focus:ring-2 focus:ring-[var(--color-sun)]/30"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <label className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--color-ink)]">
+                          <input
+                            type="checkbox"
+                            checked={draft.isVisible}
+                            onChange={(event) =>
+                              handleFaqDraftChange(faq.id, "isVisible", event.target.checked)
+                            }
+                            className="h-4 w-4 rounded border-[var(--color-ink)]/40"
+                          />
+                          Visible en la web
+                        </label>
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleFaqSave(faq.id)}
+                            disabled={!hasChanges || busy}
+                            className="inline-flex items-center gap-2 rounded-full border-2 border-[var(--color-ink)]/20 px-4 py-2 text-sm font-semibold text-[var(--color-ink)] transition hover:bg-[var(--color-sky)]/20 disabled:cursor-not-allowed disabled:opacity-40"
+                          >
+                            <Save size={16} /> Guardar
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleFaqDelete(faq.id)}
+                            disabled={deleting}
+                            className="inline-flex items-center gap-2 rounded-full border-2 border-red-300 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            <Trash2 size={16} /> Eliminar
+                          </button>
+                        </div>
+                      </div>
+                      <p className="text-xs font-medium text-[var(--color-ink)]/60">
+                        Recibida el{" "}
+                        {new Date(faq.created_at).toLocaleDateString("es-ES", {
+                          day: "2-digit",
+                          month: "long",
+                          year: "numeric",
+                        })}
+                        {faq.askerName ? ` · ${faq.askerName}` : ""}
+                        {faq.askerEmail ? ` · ${faq.askerEmail}` : ""}
+                      </p>
                     </div>
-                  </div>
-                  <p className="text-xs font-medium text-[var(--color-ink)]/60">
-                    Recibida el {" "}
-                    {new Date(faq.created_at).toLocaleDateString("es-ES", {
-                      day: "2-digit",
-                      month: "long",
-                      year: "numeric",
-                    })}
-                    {faq.askerName ? ` · ${faq.askerName}` : ""}
-                    {faq.askerEmail ? ` · ${faq.askerEmail}` : ""}
-                  </p>
+                  )}
                 </li>
               );
             })}

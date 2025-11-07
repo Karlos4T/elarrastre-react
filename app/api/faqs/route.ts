@@ -48,10 +48,19 @@ export async function POST(request: NextRequest) {
     const question = sanitize(body?.question);
     const name = sanitize(body?.name ?? body?.askerName);
     const email = sanitize(body?.email ?? body?.askerEmail);
+    const answer = sanitize(body?.answer);
+    const isVisible = Boolean(body?.isVisible ?? body?.is_visible);
 
     if (!question) {
       return NextResponse.json(
         { error: "La pregunta es obligatoria." },
+        { status: 400 }
+      );
+    }
+
+    if (isVisible && !answer) {
+      return NextResponse.json(
+        { error: "Necesitas una respuesta antes de hacerla visible." },
         { status: 400 }
       );
     }
@@ -68,8 +77,8 @@ export async function POST(request: NextRequest) {
 
     const insertPayload = {
       question,
-      answer: null,
-      is_visible: false,
+      answer: answer || null,
+      is_visible: isVisible ? true : false,
       position: nextPosition,
       asker_name: name || null,
       asker_email: email || null,

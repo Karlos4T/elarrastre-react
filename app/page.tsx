@@ -1,5 +1,6 @@
 import { createSupabaseAdminClient } from "../lib/supabaseAdmin";
 import HomeClient from "./components/HomeClient";
+import { Analytics } from "@vercel/analytics/next"
 
 type CollaboratorRow = {
   id: number;
@@ -57,21 +58,10 @@ export default async function Home() {
     );
   }
 
-  const normalizeImage = (image: string | null) => {
-    if (!image) return null;
-    if (image.startsWith("\\x")) {
-      return Buffer.from(image.slice(2), "hex").toString("base64");
-    }
-    return image;
-  };
-
   const collaborators: Collaborator[] = (collaboratorsResult.data ?? [])
     .map((item, index) => ({
       ...item,
-      imageSrc: (() => {
-        const base64 = normalizeImage(item.image);
-        return base64 ? `data:image/png;base64,${base64}` : null;
-      })(),
+      imageSrc: item.image,
       webLink: item.web_link,
       position: item.position ?? index + 1,
     }))
@@ -95,10 +85,13 @@ export default async function Home() {
     console.error("No se pudo contar las inscripciones", registrationsError.message);
   }
   return (
-    <HomeClient
-      collaborators={collaborators}
-      registrationsCount={registrationsCount ?? 0}
-      faqs={faqs}
-    />
+    <>
+      <Analytics/>
+      <HomeClient
+        collaborators={collaborators}
+        registrationsCount={registrationsCount ?? 0}
+        faqs={faqs}
+      />
+    </>
   );
 }

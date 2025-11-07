@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import { NextResponse } from "next/server";
 import { createSupabaseAdminClient } from "../../../lib/supabaseAdmin";
 import { AdminUnauthorizedError, requireAdminSession } from "../../../lib/auth";
@@ -6,50 +7,27 @@ function sanitize(value: unknown): string {
   return (typeof value === "string" ? value : "").trim();
 }
 
-function bufferFromUnknown(image: unknown): Buffer | null {
-  if (!image) return null;
-  if (Buffer.isBuffer(image)) return image;
-  if (image instanceof ArrayBuffer) return Buffer.from(image);
-  if (ArrayBuffer.isView(image)) {
-    const view = image as ArrayBufferView;
-    return Buffer.from(view.buffer, view.byteOffset, view.byteLength);
-  }
-  if (typeof image === "object" && image !== null && "data" in image) {
-    const data = (image as { data?: ArrayLike<number> }).data;
-    if (data) {
-      return Buffer.from(data as ArrayLike<number>);
-    }
-  }
-  if (Array.isArray(image)) {
-    return Buffer.from(image);
-  }
-  if (typeof image === "string") {
-    if (image.startsWith("\\x")) {
-      return Buffer.from(image.slice(2), "hex");
-    }
-    if (image.startsWith("data:image")) {
-      const base64 = image.split(",").pop();
-      return base64 ? Buffer.from(base64, "base64") : null;
-    }
-    return Buffer.from(image, "base64");
-  }
-  return null;
-}
+const BUCKET = "elarrastre";
 
-function serializeImage(image: unknown): string | null {
-  if (!image) return null;
-  if (typeof image === "string") {
-    if (image.startsWith("data:image")) return image;
-    if (image.startsWith("\\x")) {
-      const base64 = Buffer.from(image.slice(2), "hex").toString("base64");
-      return `data:image/png;base64,${base64}`;
-    }
-    return `data:image/png;base64,${image}`;
+function decodeBase64Image(image: string) {
+  let contentType = "image/png";
+  let base64 = image;
+
+  const match = image.match(/^data:(.*?);base64,(.*)$/);
+  if (match) {
+    contentType = match[1] || contentType;
+    base64 = match[2] || "";
   }
 
-  const buffer = bufferFromUnknown(image);
-  if (!buffer) return null;
-  return `data:image/png;base64,${buffer.toString("base64")}`;
+  try {
+    const buffer = Buffer.from(base64, "base64");
+    const extension =
+      contentType.split("/")[1]?.split("+")[0]?.split(";")[0] || "png";
+    return { buffer, contentType, extension };
+  } catch (error) {
+    console.error("No se pudo decodificar la imagen base64", error);
+    return { buffer: null, contentType, extension: "png" };
+  }
 }
 
 export async function GET() {
@@ -69,13 +47,7 @@ export async function GET() {
       );
     }
 
-    const serialized =
-      data?.map((item) => ({
-        ...item,
-        image: serializeImage(item.image),
-      })) ?? [];
-
-    return NextResponse.json(serialized);
+    return NextResponse.json(data ?? []);
   } catch (error) {
     console.error("Error procesando GET de colaboradores", error);
     return NextResponse.json(
@@ -100,7 +72,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const name = sanitize(body?.name);
     const webLink = sanitize(body?.webLink ?? body?.web_link ?? "");
-    let imageBase64 =
+    const imageBase64 =
       typeof body?.imageBase64 === "string" ? body.imageBase64.trim() : "";
 
     if (!name || !imageBase64) {
@@ -110,28 +82,34 @@ export async function POST(request: Request) {
       );
     }
 
-    // eliminamos prefijo data:image/...;base64,
-    if (imageBase64.includes(",")) {
-      imageBase64 = (imageBase64.split(",").pop() ?? "").trim();
-    }
-
-    let imageBuffer: Buffer;
-    try {
-      imageBuffer = Buffer.from(imageBase64, "base64");
-    } catch (conversionError) {
-      console.error("Imagen no válida", conversionError);
+    const { buffer, contentType, extension } = decodeBase64Image(imageBase64);
+    if (!buffer) {
       return NextResponse.json(
         { error: "El archivo de imagen no es válido." },
         { status: 400 }
       );
     }
 
-    if (imageBuffer.length === 0) {
+    const filePath = `collaborators/${randomUUID()}.${extension}`;
+    const uploadResult = await supabase.storage
+      .from(BUCKET)
+      .upload(filePath, buffer, {
+        contentType,
+        upsert: false,
+      });
+
+    if (uploadResult.error) {
+      console.error("Error subiendo imagen a storage", uploadResult.error);
       return NextResponse.json(
-        { error: "La imagen no puede estar vacía." },
-        { status: 400 }
+        { error: "No se pudo guardar la imagen." },
+        { status: 500 }
       );
     }
+
+    const { data: publicUrlData } = supabase.storage
+      .from(BUCKET)
+      .getPublicUrl(filePath);
+    const publicUrl = publicUrlData?.publicUrl ?? null;
 
     const explicitPosition =
       typeof body?.position === "number" && Number.isFinite(body.position)
@@ -149,7 +127,7 @@ export async function POST(request: Request) {
 
     const insertPayload: Record<string, unknown> = {
       name,
-      image: imageBuffer,
+      image: publicUrl,
       web_link: webLink || null,
       position: nextPosition,
     };
@@ -173,7 +151,6 @@ export async function POST(request: Request) {
       data
         ? {
             ...data,
-            image: serializeImage(data.image),
           }
         : data,
       { status: 201 }

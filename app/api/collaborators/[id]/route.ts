@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdminClient } from "../../../../lib/supabaseAdmin";
 import { AdminUnauthorizedError, requireAdminSession } from "../../../../lib/auth";
@@ -14,49 +15,37 @@ function parseId(value: string | string[] | undefined) {
 
 type RouteContext = { params: Promise<{ id: string }> };
 
-function bufferFromUnknown(image: unknown): Buffer | null {
-  if (!image) return null;
-  if (Buffer.isBuffer(image)) return image;
-  if (image instanceof ArrayBuffer) return Buffer.from(image);
-  if (ArrayBuffer.isView(image)) {
-    const view = image as ArrayBufferView;
-    return Buffer.from(view.buffer, view.byteOffset, view.byteLength);
+const BUCKET = "elarrastre";
+
+function decodeBase64Image(image: string) {
+  let contentType = "image/png";
+  let base64 = image;
+
+  const match = image.match(/^data:(.*?);base64,(.*)$/);
+  if (match) {
+    contentType = match[1] || contentType;
+    base64 = match[2] || "";
   }
-  if (typeof image === "object" && image !== null && "data" in image) {
-    const data = (image as { data?: ArrayLike<number> }).data;
-    if (data) {
-      return Buffer.from(data as ArrayLike<number>);
-    }
+
+  try {
+    const buffer = Buffer.from(base64, "base64");
+    const extension =
+      contentType.split("/")[1]?.split("+")[0]?.split(";")[0] || "png";
+    return { buffer, contentType, extension };
+  } catch (error) {
+    console.error("No se pudo decodificar la imagen base64", error);
+    return { buffer: null, contentType, extension: "png" };
   }
-  if (Array.isArray(image)) {
-    return Buffer.from(image);
-  }
-  if (typeof image === "string") {
-    if (image.startsWith("\\x")) {
-      return Buffer.from(image.slice(2), "hex");
-    }
-    if (image.startsWith("data:image")) {
-      const base64 = image.split(",").pop();
-      return base64 ? Buffer.from(base64, "base64") : null;
-    }
-    return Buffer.from(image, "base64");
-  }
-  return null;
 }
 
-function serializeImage(image: unknown): string | null {
-  if (!image) return null;
-  if (typeof image === "string") {
-    if (image.startsWith("data:image")) return image;
-    if (image.startsWith("\\x")) {
-      const base64 = Buffer.from(image.slice(2), "hex").toString("base64");
-      return `data:image/png;base64,${base64}`;
-    }
-    return `data:image/png;base64,${image}`;
+function extractStoragePathFromUrl(url: string | null | undefined) {
+  if (!url) return null;
+  const marker = `/object/public/${BUCKET}/`;
+  const index = url.indexOf(marker);
+  if (index === -1) {
+    return null;
   }
-  const buffer = bufferFromUnknown(image);
-  if (!buffer) return null;
-  return `data:image/png;base64,${buffer.toString("base64")}`;
+  return url.slice(index + marker.length);
 }
 
 export async function PUT(request: NextRequest, context: RouteContext) {
@@ -78,7 +67,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 
     const payload = await request.json().catch(() => ({}));
     const name = sanitize(payload?.name);
-    let imageBase64 =
+    const imageBase64 =
       typeof payload?.imageBase64 === "string" ? payload.imageBase64.trim() : "";
 
     if (!name) {
@@ -88,21 +77,39 @@ export async function PUT(request: NextRequest, context: RouteContext) {
       );
     }
 
-    const updateData: Record<string, unknown> = { name };
-    if (imageBase64) {
-      if (imageBase64.includes(",")) {
-        imageBase64 = (imageBase64.split(",").pop() ?? "").trim();
-      }
+    const supabase = createSupabaseAdminClient();
+    const { data: existingRow } = await supabase
+      .from("collaborators")
+      .select("image")
+      .eq("id", id)
+      .single();
 
-      try {
-        updateData.image = Buffer.from(imageBase64, "base64");
-      } catch (error) {
-        console.error("Imagen no válida", error);
+    const updateData: Record<string, unknown> = { name };
+    let uploadedFilePath: string | null = null;
+    if (imageBase64) {
+      const { buffer, contentType, extension } = decodeBase64Image(imageBase64);
+      if (!buffer) {
         return NextResponse.json(
           { error: "El archivo de imagen no es válido." },
           { status: 400 }
         );
       }
+      const filePath = `collaborators/${randomUUID()}.${extension}`;
+      const uploadResult = await supabase.storage
+        .from(BUCKET)
+        .upload(filePath, buffer, { contentType, upsert: false });
+      if (uploadResult.error) {
+        console.error("Error subiendo imagen a storage", uploadResult.error);
+        return NextResponse.json(
+          { error: "No se pudo guardar la imagen." },
+          { status: 500 }
+        );
+      }
+      uploadedFilePath = filePath;
+      const { data: publicUrlData } = supabase.storage
+        .from(BUCKET)
+        .getPublicUrl(filePath);
+      updateData.image = publicUrlData?.publicUrl ?? null;
     }
 
     const webLinkProvided =
@@ -113,7 +120,6 @@ export async function PUT(request: NextRequest, context: RouteContext) {
       updateData.web_link = webLinkValue || null;
     }
 
-    const supabase = createSupabaseAdminClient();
     const { data, error } = await supabase
       .from("collaborators")
       .update(updateData)
@@ -136,10 +142,14 @@ export async function PUT(request: NextRequest, context: RouteContext) {
       );
     }
 
-    return NextResponse.json({
-      ...data,
-      image: serializeImage(data.image),
-    });
+    if (uploadedFilePath && existingRow?.image) {
+      const previousPath = extractStoragePathFromUrl(existingRow.image);
+      if (previousPath) {
+        await supabase.storage.from(BUCKET).remove([previousPath]);
+      }
+    }
+
+    return NextResponse.json(data);
   } catch (error) {
     console.error("Error procesando PUT de colaborador", error);
     return NextResponse.json(
@@ -167,6 +177,12 @@ export async function DELETE(_request: NextRequest, context: RouteContext) {
     }
 
     const supabase = createSupabaseAdminClient();
+    const { data: existingRow } = await supabase
+      .from("collaborators")
+      .select("image")
+      .eq("id", id)
+      .single();
+
     const { error } = await supabase.from("collaborators").delete().eq("id", id);
 
     if (error) {
@@ -175,6 +191,13 @@ export async function DELETE(_request: NextRequest, context: RouteContext) {
         { error: "No se pudo eliminar el colaborador." },
         { status: 500 }
       );
+    }
+
+    if (existingRow?.image) {
+      const path = extractStoragePathFromUrl(existingRow.image);
+      if (path) {
+        await supabase.storage.from(BUCKET).remove([path]);
+      }
     }
 
     return NextResponse.json({ ok: true }, { status: 200 });

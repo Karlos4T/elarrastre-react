@@ -52,10 +52,6 @@ button {
   cursor: pointer;
 }
 
-.page-shell {
-  position: relative;
-  isolation: isolate;
-}
 
 .shape-cloud {
   position: absolute;

@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { MouseEvent, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 
@@ -11,7 +10,9 @@ import HeroBanner from "./HeroBanner";
 import PreviousEditions from "./PreviousEditions";
 import CollaboratorProposalForm from "./CollaboratorProposalForm";
 import RegistrationForm from "./RegistrationForm";
-import ScrollAnimations from "./ScrollAnimations";
+import HeroRegistrationSection from "./home/HeroRegistrationSection";
+import ContactInfoCard from "./home/ContactInfoCard";
+import HomeFooter from "./home/HomeFooter";
 
 type Collaborator = {
   id: number;
@@ -43,67 +44,25 @@ export default function HomeClient({ collaborators, registrationsCount, faqs }: 
 
   return (
     <div className="page-shell min-h-screen w-full bg-[var(--color-blush)] text-[var(--color-ink)]">
-      <ScrollAnimations />
       <HeroBanner />
-      <main className="relative flex min-h-screen w-full flex-col gap-24 px-6 py-16 pb-32 sm:px-10 lg:px-20 lg:pb-20">
+      <main className="flex min-h-screen w-full flex-col gap-24 px-6 py-16 pb-32 sm:px-10 lg:px-20 lg:pb-20">
         <div className="shape-sunburst" />
         <div className="shape-cloud" />
         <div className="shape-heartband" />
 
-        <section
-          id="registro"
-          className="reveal-on-scroll relative flex justify-center gap-10 rounded-[48px] mt-20 lg:items-start"
-        >
-          <div className="hero-actions organic-card hero-actions--poster flex max-w-[800px] flex-col gap-7 rounded-[36px] bg-white p-8 lg:p-10">
-            <div className="space-y-4">
-              <h2 className="text-4xl font-black leading-tight lg:text-5xl">
-                Súmate a la <span className="accent-text">IV Jornada</span>
-              </h2>
-              <p className="text-lg leading-relaxed text-[var(--color-ink)]/85 lg:text-xl">
-                El Arrastre es la peña de Villanueva de Bogas que desde hace cuatro años organiza una
-                jornada solidaria para recaudar dinero y plantar cara a la ELA.
-              </p>
-            </div>
-
-            <p className="rounded-[26px] py-3 pb-7 my-15 text-4xl text-center font-semibold text-[var(--color-ink)]">
-              Ya somos más de{" "}
-              <span className="inline-block">
-                <span className="left-0 bottom-0 w-full text-5xl h-[0.4em] bg-[var(--color-sun)]/70 px-3 py-1 rounded-2xl z-0">
-                  {friendlyCount > 0 ? friendlyCount.toLocaleString("es-ES") : "0"}
-                </span>
-              </span>{" "}
-              personas apuntadas.
-            </p>
-            <div className="flex flex-col gap-4 sm:flex-row">
-              <button
-                type="button"
-                className="button-hero flex-1 text-lg lg:text-xl"
-                onClick={() => {
-                  setIsCollaboratorModalOpen(false);
-                  setIsRegistrationModalOpen(true);
-                }}
-              >
-                ¡Quiero apuntarme!
-              </button>
-              <button
-                type="button"
-                className="button-hero button-hero-blue flex-1 text-lg lg:text-xl"
-                onClick={() => {
-                  setIsRegistrationModalOpen(false);
-                  setIsCollaboratorModalOpen(true);
-                }}
-              >
-                ¡Quiero colaborar!
-              </button>
-            </div>
-          </div>
-          <RegistrationModal open={isRegistrationModalOpen} onClose={() => setIsRegistrationModalOpen(false)} />
-          <CollaboratorModal open={isCollaboratorModalOpen} onClose={() => setIsCollaboratorModalOpen(false)} />
-          {/* 
-          <div className="organic-card h-full flex flex-col gap-5 p-8 text-lg leading-relaxed text-[var(--color-ink)] lg:text-xl">
-           <img className="h-full object-cover rounded-xl" src="/logros2.webp" alt="" />
-          </div> */}
-        </section>
+        <HeroRegistrationSection
+          friendlyCount={friendlyCount}
+          onShowRegistration={() => {
+            setIsCollaboratorModalOpen(false);
+            setIsRegistrationModalOpen(true);
+          }}
+          onShowCollaborator={() => {
+            setIsRegistrationModalOpen(false);
+            setIsCollaboratorModalOpen(true);
+          }}
+        />
+        <RegistrationModal open={isRegistrationModalOpen} onClose={() => setIsRegistrationModalOpen(false)} />
+        <CollaboratorModal open={isCollaboratorModalOpen} onClose={() => setIsCollaboratorModalOpen(false)} />
 
         <section id="colaboradores" className="reveal-on-scroll flex flex-col gap-10">
           <CollaboratorsShowcase collaborators={collaborators} />
@@ -118,40 +77,10 @@ export default function HomeClient({ collaborators, registrationsCount, faqs }: 
           className="reveal-on-scroll grid gap-8 text-lg lg:grid-cols-[1.2fr_1fr] lg:items-start lg:text-xl"
         >
           <ContactForm />
-          <div className="organic-card flex flex-col gap-5 p-8 text-lg leading-relaxed text-[var(--color-ink)] lg:text-xl">
-            <h3 className="text-2xl font-semibold lg:text-3xl">
-              Propón tu colaboración
-            </h3>
-            <p>
-              ¿Tienes una actuación, un taller o quieres apoyar la logística? Escríbenos y te
-              ayudamos a sumarte al cartel solidario.
-            </p>
-            <div className="grid gap-3 text-lg font-semibold lg:text-xl">
-              <span className="rounded-full bg-[var(--color-lilac)]/60 px-4 py-2">
-                • Coordinamos voluntariado y logística inclusiva.
-              </span>
-              <span className="rounded-full bg-[var(--color-sky)]/50 px-4 py-2">
-                • Activamos programación artística con sentido social.
-              </span>
-              <span className="rounded-full bg-[var(--color-blush)]/70 px-4 py-2">
-                • Construimos comunidad de cuidado y apoyo mutuo.
-              </span>
-            </div>
-          </div>
+          <ContactInfoCard />
         </section>
 
-        <footer className="rounded-[36px] border-4 border-[var(--color-ink)] bg-white px-8 py-6 text-lg font-semibold text-[var(--color-ink)] flex flex-col items-center shadow-[0_12px_0_rgba(27,27,31,0.08)]">
-          <p>
-            © {new Date().getFullYear()} El Arrastre Solidario · Cultura que abraza,
-            comunidad que transforma.
-          </p>
-          <Link
-            href="/admin"
-            className="button-secondary flex-1 text-center text-lg mt-8 lg:text-xl w-100"
-          >
-            Ir al panel admin
-          </Link>
-        </footer>
+        <HomeFooter />
       </main>
     </div>
   );

@@ -94,14 +94,6 @@ export default async function AdminPage() {
     );
   }
 
-  const normalizeImage = (image: string | null) => {
-    if (!image) return null;
-    if (image.startsWith("\\x")) {
-      return Buffer.from(image.slice(2), "hex").toString("base64");
-    }
-    return image;
-  };
-
   const faqs = ((faqsResult.data as FaqRow[] | null) ?? [])
     .map((item, index) => ({
       id: item.id,
@@ -119,10 +111,7 @@ export default async function AdminPage() {
   const collaborators = (collaboratorsResult.data ?? [])
     .map((item, index) => ({
       ...item,
-      imageSrc: (() => {
-        const base64 = normalizeImage(item.image);
-        return base64 ? `data:image/png;base64,${base64}` : null;
-      })(),
+      imageSrc: item.image,
       webLink: item.web_link,
       position: item.position ?? index + 1,
     }))

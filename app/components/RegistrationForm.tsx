@@ -89,7 +89,7 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
       <p className="text-md leading-relaxed text-[var(--color-ink)]/80">
         Deja tu nombre y súmate al movimiento <span className="accent-text">#ElArrastrePorLaELA</span>.
       </p>
-      <label className="flex flex-col gap-2 text-md font-medium text-[var(--color-ink)]">
+      <label className="flex flex-col gap-2 my-5 text-md font-medium text-[var(--color-ink)]">
         Nombre completo
         <input
           type="text"
@@ -125,16 +125,18 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
           ))}
         </div>
       )}
-      <button
-        type="button"
-        className="button-secondary w-full sm:w-auto"
-        onClick={addCompanionField}
-      >
-        Añadir acompañante
-      </button>
-      <button type="submit" disabled={submitting} className="button-primary w-full sm:w-auto">
-        {submitting ? "Enviando..." : "Quiero participar"}
-      </button>
+      <div className="flex gap-4 justify-end flex-col sm:flex-row">
+        <button
+          type="button"
+          className="button-secondary w-full sm:w-auto"
+          onClick={addCompanionField}
+        >
+          Añadir acompañante
+        </button>
+        <button type="submit" disabled={submitting} className="button-primary w-full sm:w-auto">
+          {submitting ? "Enviando..." : "Enviar"}
+        </button>
+      </div>
     </form>
   );
 }

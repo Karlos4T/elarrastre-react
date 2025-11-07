@@ -64,7 +64,7 @@ export default function PreviousEditions() {
               </span>
               {edition.highlight}
             </div>
-            <div className="relative h-40 w-full overflow-hidden rounded-[18px] border border-[var(--color-ink)]/15 bg-white/70">
+            <div className="relative h-60 w-full overflow-hidden rounded-[18px] border border-[var(--color-ink)]/15 bg-white/70">
               <Image
                 src={edition.image}
                 alt={edition.highlight}
