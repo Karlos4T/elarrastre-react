@@ -48,13 +48,6 @@ export default function CollaboratorsShowcase({ collaborators }: Props) {
               quieres sumarte, cuéntanos tu propuesta.
             </p>
           </div>
-          <div className="collab-header-actions">
-            <button onClick={() => setOpen(true)} className="button-secondary">
-              <b>
-                ¡QUIERO COLABORAR!
-              </b>
-            </button>
-          </div>
         </div>
 
         {decorated.length === 0 ? (
@@ -95,7 +88,13 @@ export default function CollaboratorsShowcase({ collaborators }: Props) {
           </div>
         )}
       </div>
-
+      <div className="flex justify-center">
+        <button onClick={() => setOpen(true)} className="button-secondary">
+          <b>
+            ¡QUIERO COLABORAR!
+          </b>
+        </button>
+      </div>
       <CollaboratorModal open={open} onClose={() => setOpen(false)} />
     </>
   );

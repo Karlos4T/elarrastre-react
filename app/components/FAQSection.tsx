@@ -58,13 +58,6 @@ export default function FAQSection({ faqs }: Props) {
             Aquí recopilamos las respuestas que más se repiten. Si no ves la tuya, pregúntanos.
           </p>
         </div>
-        <button
-          type="button"
-          className="button-secondary rounded-full px-6 py-3 text-base"
-          onClick={() => setIsModalOpen(true)}
-        >
-          Tengo una pregunta
-        </button>
       </div>
 
       {sortedFaqs.length === 0 ? (
@@ -90,7 +83,16 @@ export default function FAQSection({ faqs }: Props) {
           ))}
         </ul>
       )}
+      <div className="flex justify-center mt-6">
 
+        <button
+          type="button"
+          className="button-tertiary rounded-full px-6 py-3 text-base w-fit"
+          onClick={() => setIsModalOpen(true)}
+        >
+          Tengo una pregunta
+        </button>
+      </div>
       <AskQuestionModal open={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </section>
   );

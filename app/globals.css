@@ -153,6 +153,46 @@ button {
   box-shadow: 0 8px 0 rgba(27, 27, 31, 0.2);
 }
 
+
+.button-tertiary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.78rem 1.5rem;
+  border-radius: 999px;
+  background-color: var(--color-sun);
+  color: var(--color-ink);
+  border: 3px solid var(--color-ink);
+  font-weight: 600;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 6px 0 rgba(27, 27, 31, 0.18);
+}
+
+.button-tertiary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 0 rgba(27, 27, 31, 0.2);
+}
+
+
+.button-lila {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.78rem 1.5rem;
+  border-radius: 999px;
+  background-color: var(--color-lilac);
+  color: var(--color-ink);
+  border: 3px solid var(--color-ink);
+  font-weight: 600;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 6px 0 rgba(27, 27, 31, 0.18);
+}
+
+.button-lila:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 0 rgba(27, 27, 31, 0.2);
+}
+
 .button-hero {
   display: inline-flex;
   align-items: center;

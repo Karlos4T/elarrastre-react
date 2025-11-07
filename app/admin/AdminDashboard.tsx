@@ -972,6 +972,30 @@ export default function AdminDashboard({
           </p>
         )}
       </header>
+      <section className="rounded-[40px] border-2 border-dashed border-[var(--color-ink)]/25 bg-white/80 p-6 shadow-[0_12px_0_rgba(27,27,31,0.05)] sm:p-8">
+        <h2 className="text-lg font-semibold text-[var(--color-ink)]">Guía rápida</h2>
+        <p className="mt-2 text-sm font-medium text-[var(--color-ink)]/70">
+          Acciones disponibles para admins:
+        </p>
+        <ul className="mt-4 grid gap-3 text-sm text-[var(--color-ink)]/80 sm:grid-cols-2">
+          <li className="rounded-3xl bg-[var(--color-sky)]/10 px-4 py-3">
+            Reordena colaboradores y FAQs arrastrando desde el icono de agarre y pulsa
+            el botón <b>Guardar cambios</b> para fijar el nuevo orden.
+          </li>
+          <li className="rounded-3xl bg-[var(--color-sun)]/20 px-4 py-3">
+            Abre la ficha de cada colaborador para editar o eliminar información, o usa
+            “Añadir colaborador” para crear uno nuevo.
+          </li>
+          <li className="rounded-3xl bg-[var(--color-blush)]/20 px-4 py-3">
+            Gestiona las FAQs: crea preguntas nuevas, edita pregunta y respuesta dentro
+            de cada tarjeta y decide si son visibles en la web.
+          </li>
+          <li className="rounded-3xl bg-[var(--color-ink)]/5 px-4 py-3">
+            Actualiza nombres de inscripciones o elimina duplicados, y revisa propuestas
+            de contacto aceptando o descartando las que ya atendiste.
+          </li>
+        </ul>
+      </section>
 
       <section
         id="admin-registrations"

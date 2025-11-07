@@ -11,7 +11,7 @@ export default function HomeFooter() {
       </p>
       <Link
         href="/admin"
-        className="button-secondary flex-1 text-center text-lg mt-8 lg:text-xl max-w-100"
+        className="button-lila flex-1 text-center text-lg mt-8 lg:text-xl max-w-100"
       >
         Ir al panel admin
       </Link>
