@@ -18,7 +18,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const rows = names.map((name) => ({ name }));
+    const rows = names.map((name: any) => ({ name }));
 
     const supabase = createSupabaseAdminClient();
     const { data, error } = await supabase
