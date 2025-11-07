@@ -43,9 +43,6 @@ type FAQ = {
 
 const SECTION_KEYS = ["registrations", "collaborators", "proposals", "faqs"] as const;
 type SectionKey = (typeof SECTION_KEYS)[number];
-const lastSeenStorageKey = (section: SectionKey) => `admin:lastSeen:${section}`;
-type CreatedRecord = { created_at: string };
-
 type Props = {
   registrations: Registration[];
   collaborators: Collaborator[];
@@ -127,14 +124,6 @@ export default function AdminDashboard({
   const [createFaqError, setCreateFaqError] = useState<string | null>(null);
   const [showNewFaqForm, setShowNewFaqForm] = useState(false);
   const [activeTab, setActiveTab] = useState<SectionKey>("registrations");
-  const initialTimestamp = new Date(0).toISOString();
-  const [lastSeen, setLastSeen] = useState<Record<SectionKey, string>>({
-    registrations: initialTimestamp,
-    collaborators: initialTimestamp,
-    proposals: initialTimestamp,
-    faqs: initialTimestamp,
-  });
-  const [lastSeenReady, setLastSeenReady] = useState(false);
 
   useEffect(() => {
     setCollaboratorList(collaborators);
@@ -152,32 +141,6 @@ export default function AdminDashboard({
     setCreateFaqError(null);
     setShowNewFaqForm(false);
   }, [faqs]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-    setLastSeen((prev) => {
-      const next = { ...prev };
-      let changed = false;
-      SECTION_KEYS.forEach((section) => {
-        const stored = window.localStorage.getItem(lastSeenStorageKey(section));
-        if (stored) {
-          if (stored !== prev[section]) {
-            next[section] = stored;
-            changed = true;
-          }
-        } else {
-          const now = new Date().toISOString();
-          window.localStorage.setItem(lastSeenStorageKey(section), now);
-          next[section] = now;
-          changed = true;
-        }
-      });
-      return changed ? next : prev;
-    });
-    setLastSeenReady(true);
-  }, []);
 
   const totalRegistrations = registrations.length;
   const totalCollaborators = collaboratorList.length;
@@ -438,75 +401,8 @@ export default function AdminDashboard({
     openCollaboratorModal(collaborator);
   };
 
-  const itemsBySection = useMemo<Record<SectionKey, CreatedRecord[]>>(
-    () => ({
-      registrations,
-      collaborators: collaboratorList,
-      proposals: contactRequestList,
-      faqs: faqList,
-    }),
-    [registrations, collaboratorList, contactRequestList, faqList]
-  );
-
-  const getLatestTimestampFromItems = (items: CreatedRecord[]) => {
-    if (!items?.length) {
-      return new Date().toISOString();
-    }
-    const latestMs = items.reduce((max, item) => {
-      const value = Date.parse(item.created_at);
-      if (Number.isNaN(value)) {
-        return max;
-      }
-      return Math.max(max, value);
-    }, 0);
-    return new Date(latestMs || Date.now()).toISOString();
-  };
-
-  const markSectionAsRead = (section: SectionKey, items: CreatedRecord[]) => {
-    if (typeof window === "undefined" || !lastSeenReady) {
-      return;
-    }
-    const timestamp = getLatestTimestampFromItems(items);
-    window.localStorage.setItem(lastSeenStorageKey(section), timestamp);
-    setLastSeen((prev) => ({ ...prev, [section]: timestamp }));
-  };
-
-  useEffect(() => {
-    if (!lastSeenReady) {
-      return;
-    }
-    markSectionAsRead(activeTab, itemsBySection[activeTab]);
-  }, [activeTab, itemsBySection, lastSeenReady]);
-
-  const newCounts = useMemo<Record<SectionKey, number>>(() => {
-    const counts: Record<SectionKey, number> = {
-      registrations: 0,
-      collaborators: 0,
-      proposals: 0,
-      faqs: 0,
-    };
-    if (!lastSeenReady) {
-      return counts;
-    }
-    SECTION_KEYS.forEach((section) => {
-      const lastSeenTimestamp = lastSeen[section];
-      const lastMs = lastSeenTimestamp ? Date.parse(lastSeenTimestamp) : 0;
-      if (Number.isNaN(lastMs)) {
-        counts[section] = 0;
-        return;
-      }
-      const items = itemsBySection[section] ?? [];
-      counts[section] = items.filter((item) => {
-        const createdMs = Date.parse(item.created_at);
-        return !Number.isNaN(createdMs) && createdMs > lastMs;
-      }).length;
-    });
-    return counts;
-  }, [itemsBySection, lastSeen, lastSeenReady]);
-
   const handleTabSelect = (section: SectionKey) => {
     setActiveTab(section);
-    markSectionAsRead(section, itemsBySection[section]);
   };
 
   const normalizeFaq = (item: any): FAQ => ({
@@ -928,14 +824,14 @@ export default function AdminDashboard({
           <StatCard
             label="Inscripciones"
             value={totalRegistrations}
-            delta={newCounts.registrations}
+            delta={0}
             active={activeTab === "registrations"}
             onClick={() => handleTabSelect("registrations")}
           />
           <StatCard
             label="Colaboradores"
             value={totalCollaborators}
-            delta={newCounts.collaborators}
+            delta={0}
             active={activeTab === "collaborators"}
             onClick={() => handleTabSelect("collaborators")}
           />
@@ -949,14 +845,14 @@ export default function AdminDashboard({
                 ).toLocaleDateString()}`
                 : null
             }
-            delta={newCounts.proposals}
+            delta={0}
             active={activeTab === "proposals"}
             onClick={() => handleTabSelect("proposals")}
           />
           <StatCard
             label="Preguntas"
             value={totalFaqs}
-            delta={newCounts.faqs}
+            delta={0}
             active={activeTab === "faqs"}
             onClick={() => handleTabSelect("faqs")}
           />
