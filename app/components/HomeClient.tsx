@@ -1,6 +1,6 @@
 "use client";
 
-import { MouseEvent, useEffect, useMemo, useState } from "react";
+import { MouseEvent, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
 import CollaboratorsShowcase from "./CollaboratorsShowcase";
@@ -34,13 +34,9 @@ type Props = {
 export default function HomeClient({ collaborators, registrationsCount, faqs }: Props) {
   const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
   const [isCollaboratorModalOpen, setIsCollaboratorModalOpen] = useState(false);
-
-  const friendlyCount = useMemo(() => {
-    if (!registrationsCount || registrationsCount < 0) {
-      return 0;
-    }
-    return registrationsCount;
-  }, [registrationsCount]);
+  const friendlyCount = Number.isFinite(registrationsCount)
+    ? Math.max(0, registrationsCount)
+    : 0;
 
   return (
     <div className="page-shell min-h-screen w-full bg-[var(--color-blush)] text-[var(--color-ink)]">

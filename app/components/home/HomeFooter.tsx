@@ -11,9 +11,9 @@ export default function HomeFooter() {
       </p>
       <Link
         href="/admin"
-        className="button-lila flex-1 text-center text-sm mt-8 lg:text-xl max-w-100"
+        className=""
       >
-        Ir al panel admin
+        Ir al panel
       </Link>
     </footer>
   );
