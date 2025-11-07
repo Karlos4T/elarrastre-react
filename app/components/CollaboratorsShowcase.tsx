@@ -56,35 +56,52 @@ export default function CollaboratorsShowcase({ collaborators }: Props) {
           </p>
         ) : (
           <div className="collab-grid">
-            {decorated.map((collaborator) => (
-              <article
-                key={collaborator.id}
-                className="collab-card reveal-on-scroll"
-                style={{ "--collab-tone": collaborator.tone } as CSSProperties}
-              >
-                <div className="collab-avatar">
-                  {collaborator.imageSrc ? (
-                    <img src={collaborator.imageSrc} alt={collaborator.name} />
-                  ) : (
-                    <div className="grid h-full w-full place-items-center text-xs font-semibold text-[var(--color-ink)]/60">
-                      Sin imagen
-                    </div>
-                  )}
-                </div>
-                {collaborator.webLink ? (
+            {decorated.map((collaborator) => {
+              const hasLink = Boolean(collaborator.webLink);
+              const cardClassName = `collab-card reveal-on-scroll ${
+                hasLink ? "collab-card--link" : ""
+              }`;
+              const content = (
+                <>
+                  <div className="collab-avatar">
+                    {collaborator.imageSrc ? (
+                      <img src={collaborator.imageSrc} alt={collaborator.name} />
+                    ) : (
+                      <div className="grid h-full w-full place-items-center text-xs font-semibold text-[var(--color-ink)]/60">
+                        Sin imagen
+                      </div>
+                    )}
+                  </div>
+                  <span className="collab-name">{collaborator.name}</span>
+                </>
+              );
+
+              if (hasLink && collaborator.webLink) {
+                return (
                   <a
+                    key={collaborator.id}
                     href={collaborator.webLink}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="collab-name underline-offset-4 hover:underline"
+                    className={cardClassName}
+                    style={{ "--collab-tone": collaborator.tone } as CSSProperties}
+                    aria-label={`Visitar el sitio de ${collaborator.name}`}
                   >
-                    {collaborator.name}
+                    {content}
                   </a>
-                ) : (
-                  <span className="collab-name">{collaborator.name}</span>
-                )}
-              </article>
-            ))}
+                );
+              }
+
+              return (
+                <article
+                  key={collaborator.id}
+                  className={cardClassName}
+                  style={{ "--collab-tone": collaborator.tone } as CSSProperties}
+                >
+                  {content}
+                </article>
+              );
+            })}
           </div>
         )}
       </div>

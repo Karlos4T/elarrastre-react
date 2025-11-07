@@ -40,7 +40,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="es" translate="no">
       <body
         className={`${baloo.variable} ${spaceGrotesk.variable} ${leagueSpartan.variable} ${poppins.variable}  antialiased`}
       >

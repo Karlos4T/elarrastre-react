@@ -39,13 +39,13 @@ export default function HeroRegistrationSection({
           personas apuntadas.
         </p>
         <div className="flex flex-col gap-4 sm:flex-row">
-          <button
+          {/* <button
             type="button"
             className="button-hero button-hero-blue flex-1 text-lg lg:text-xl"
             onClick={onShowCollaborator}
           >
             ¡Quiero colaborar!
-          </button>
+          </button> */}
           <button
             type="button"
             className="button-hero flex-1 text-lg lg:text-xl"

@@ -80,13 +80,12 @@ export default async function Home() {
   const { count: registrationsCount = 0, error: registrationsError } = await supabase
     .from("registrations")
     .select("id", { count: "exact", head: true });
-
   if (registrationsError) {
     console.error("No se pudo contar las inscripciones", registrationsError.message);
   }
   return (
     <>
-      <Analytics/>
+      <Analytics />
       <HomeClient
         collaborators={collaborators}
         registrationsCount={registrationsCount ?? 0}
