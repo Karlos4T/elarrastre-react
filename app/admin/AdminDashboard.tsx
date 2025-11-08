@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { DragEvent, FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { useToast, ToastVariant } from "../components/ToastProvider";
 
-type Registration = {
+export type Registration = {
   id: number;
   name: string;
   created_at: string;

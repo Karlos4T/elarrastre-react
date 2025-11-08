@@ -1,4 +1,5 @@
 import { createSupabaseAdminClient } from "../lib/supabaseAdmin";
+import { Registration } from "./admin/AdminDashboard";
 import HomeClient from "./components/HomeClient";
 import { Analytics } from "@vercel/analytics/next"
 
@@ -77,21 +78,22 @@ export default async function Home() {
     }))
     .sort((a, b) => (a.position ?? Infinity) - (b.position ?? Infinity));
 
-  const { count: registrationsCount = 0, error: registrationsError } = await supabase
+  const { data: registrations = 0, error: registrationsError } = await supabase
     .from("registrations")
-    .select("id", { count: "exact", head: true });
+    .select("id, name, created_at")
+    .order("created_at", { ascending: false });
   if (registrationsError) {
     console.error("No se pudo contar las inscripciones", registrationsError.message);
   }
 
-  console.log("results: ", registrationsCount);
+  console.log("results: ", registrations);
   // hola
   return (
     <>
       <Analytics />
       <HomeClient
         collaborators={collaborators}
-        registrationsCount={registrationsCount ?? 0}
+        registrationsCount={0}
         faqs={faqs}
       />
     </>
