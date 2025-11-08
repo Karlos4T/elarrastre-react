@@ -34,7 +34,97 @@ type Props = {
 export default function HomeClient({ collaborators, registrationsCount, faqs }: Props) {
   const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
   const [isCollaboratorModalOpen, setIsCollaboratorModalOpen] = useState(false);
-  const friendlyCount = registrationsCount;
+  const [collaboratorList, setCollaboratorList] = useState(collaborators);
+  const [faqList, setFaqList] = useState(faqs);
+  const [liveRegistrationsCount, setLiveRegistrationsCount] = useState(
+    Number.isFinite(registrationsCount) ? Math.max(0, registrationsCount) : 0
+  );
+
+  useEffect(() => {
+    setCollaboratorList(collaborators);
+  }, [collaborators]);
+
+  useEffect(() => {
+    setFaqList(faqs);
+  }, [faqs]);
+
+  useEffect(() => {
+    setLiveRegistrationsCount(
+      Number.isFinite(registrationsCount) ? Math.max(0, registrationsCount) : 0
+    );
+  }, [registrationsCount]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    let cancelled = false;
+
+    const refreshData = async () => {
+      try {
+        const [collabResponse, faqResponse, registrationsResponse] = await Promise.all([
+          fetch("/api/collaborators", { signal: controller.signal }),
+          fetch("/api/faqs?visible=true", { signal: controller.signal }),
+          fetch("/api/registrations?summary=count", { signal: controller.signal }),
+        ]);
+
+        if (!collabResponse.ok) {
+          throw new Error("No se pudieron obtener los colaboradores.");
+        }
+        if (!faqResponse.ok) {
+          throw new Error("No se pudieron obtener las preguntas frecuentes.");
+        }
+        if (!registrationsResponse.ok) {
+          throw new Error("No se pudo obtener el número de inscripciones.");
+        }
+
+        const collabData = (await collabResponse.json()) as Collaborator[];
+        const faqData = (await faqResponse.json()) as FAQItem[];
+        const { count: latestCount = 0 } = (await registrationsResponse.json()) as {
+          count?: number;
+        };
+
+        if (cancelled) {
+          return;
+        }
+
+        setCollaboratorList(
+          collabData
+            .map((item, index) => ({
+              ...item,
+              imageSrc: item.image,
+              webLink: item.web_link,
+              position: item.position ?? index + 1,
+            }))
+            .sort((a, b) => (a.position ?? Infinity) - (b.position ?? Infinity))
+        );
+
+        setFaqList(
+          (faqData ?? [])
+            .map((item, index) => ({
+              ...item,
+              position: item.position ?? index + 1,
+            }))
+            .sort((a, b) => (a.position ?? Infinity) - (b.position ?? Infinity))
+        );
+        setLiveRegistrationsCount(Math.max(0, latestCount));
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+        console.error("No se pudo refrescar la información pública", error);
+      }
+    };
+
+    refreshData();
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, []);
+
+  const friendlyCount = Number.isFinite(liveRegistrationsCount)
+    ? Math.max(0, liveRegistrationsCount)
+    : 0;
 
   return (
     <div className="page-shell min-h-screen w-full bg-[var(--color-blush)] text-[var(--color-ink)]">
@@ -59,12 +149,12 @@ export default function HomeClient({ collaborators, registrationsCount, faqs }: 
         <CollaboratorModal open={isCollaboratorModalOpen} onClose={() => setIsCollaboratorModalOpen(false)} />
 
         <section id="colaboradores" className="reveal-on-scroll flex flex-col gap-10">
-          <CollaboratorsShowcase collaborators={collaborators} />
+          <CollaboratorsShowcase collaborators={collaboratorList} />
         </section>
 
         <PreviousEditions />
 
-        <FAQSection faqs={faqs} />
+        <FAQSection faqs={faqList} />
 
         <section
           id="contacto"
