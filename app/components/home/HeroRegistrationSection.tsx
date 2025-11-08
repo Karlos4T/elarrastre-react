@@ -33,7 +33,7 @@ export default function HeroRegistrationSection({
           Ya somos más de{" "}
           <span className="inline-block">
             <span className="left-0 bottom-0 w-full text-5xl h-[0.4em] bg-[var(--color-sun)]/70 px-3 py-1 rounded-2xl z-0">
-              {friendlyCount > 0 ? friendlyCount.toLocaleString("es-ES") : "0"}
+              {friendlyCount}
             </span>
           </span>{" "}
           personas apuntadas.
