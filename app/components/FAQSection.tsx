@@ -71,7 +71,7 @@ export default function FAQSection({ faqs }: Props) {
               key={faq.id}
               className="rounded-[32px] border-2 border-[var(--color-ink)]/10 bg-white px-5 py-4 shadow-[0_10px_0_rgba(27,27,31,0.06)]"
             >
-              <details open>
+              <details>
                 <summary className="cursor-pointer text-lg font-semibold text-[var(--color-ink)]">
                   {faq.question}
                 </summary>

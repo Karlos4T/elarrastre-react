@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 type HeroRegistrationSectionProps = {
   friendlyCount: number;
@@ -18,6 +20,32 @@ export default function HeroRegistrationSection({
   const [recentIncrement, setRecentIncrement] = useState<number | null>(null);
   const previousCountRef = useRef(friendlyCount);
   const incrementTimeoutRef = useRef<number | null>(null);
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const [counterActivated, setCounterActivated] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    gsap.registerPlugin(ScrollTrigger);
+  }, []);
+
+  useEffect(() => {
+    if (!sectionRef.current || counterActivated) {
+      return;
+    }
+
+    const trigger = ScrollTrigger.create({
+      trigger: sectionRef.current,
+      start: "top 70%",
+      once: true,
+      onEnter: () => setCounterActivated(true),
+    });
+
+    return () => {
+      trigger.kill();
+    };
+  }, [counterActivated]);
 
   useEffect(() => {
     if (friendlyCount > previousCountRef.current) {
@@ -51,6 +79,7 @@ export default function HeroRegistrationSection({
     <section
       id="registro"
       className="reveal-on-scroll relative flex justify-center gap-10 rounded-[48px] mt-20 lg:items-start"
+      ref={sectionRef}
     >
       <div className="hero-actions organic-card hero-actions--poster flex max-w-[800px] flex-col gap-8 rounded-[36px] bg-white p-8 lg:p-10">
         <div className="space-y-6">
@@ -133,7 +162,11 @@ export default function HeroRegistrationSection({
         <p className="my-15 rounded-[26px] py-3 pb-7 text-4xl text-center font-semibold text-[var(--color-ink)]">
           Ya somos más de{" "}
           <span className="inline-flex relative counter-chip">
-            <RollingCounter value={friendlyCount} initialValue={0} />
+            <RollingCounter
+              value={friendlyCount}
+              initialValue={counterActivated ? undefined : 0}
+              isActive={counterActivated}
+            />
             {recentIncrement && (
               <span className="counter-chip__increment">+{recentIncrement}</span>
             )}
@@ -164,9 +197,14 @@ export default function HeroRegistrationSection({
 type RollingCounterProps = {
   value: number;
   initialValue?: number;
+  isActive?: boolean;
 };
 
-function RollingCounter({ value, initialValue }: RollingCounterProps) {
+function RollingCounter({
+  value,
+  initialValue,
+  isActive = true,
+}: RollingCounterProps) {
   const [initialBaseline] = useState(() => initialValue ?? value);
   const valueNodeRef = useRef<HTMLSpanElement | null>(null);
   const previousValueRef = useRef(initialBaseline);
@@ -174,6 +212,10 @@ function RollingCounter({ value, initialValue }: RollingCounterProps) {
   const animationFrameRef = useRef<number>(0);
 
   useEffect(() => {
+    if (!isActive) {
+      return;
+    }
+
     const node = valueNodeRef.current;
     if (!node) {
       previousValueRef.current = value;
@@ -233,7 +275,7 @@ function RollingCounter({ value, initialValue }: RollingCounterProps) {
       }
       node.classList.remove("rolling-counter__value--spinning");
     };
-  }, [value]);
+  }, [value, isActive]);
 
   return (
     <span className="rolling-counter">
@@ -241,7 +283,7 @@ function RollingCounter({ value, initialValue }: RollingCounterProps) {
         ref={valueNodeRef}
         className="rolling-counter__value"
       >
-        {NUMBER_FORMATTER.format(value)}
+        {NUMBER_FORMATTER.format(isActive ? value : initialBaseline)}
       </span>
     </span>
   );

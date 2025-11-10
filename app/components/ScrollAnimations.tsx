@@ -14,18 +14,34 @@ export default function ScrollAnimations() {
 
     const ctx = gsap.context(() => {
       const elements = gsap.utils.toArray<HTMLElement>(".reveal-on-scroll");
-      elements.forEach((element) => {
-        gsap.from(element, {
-          opacity: 0,
-          y: 60,
-          duration: 0.8,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: element,
-            start: "top 85%",
-            once: true,
+
+      elements.forEach((element, index) => {
+        const direction = index % 2 === 0 ? 1 : -1;
+        const rotateAmount = gsap.utils.random(2, 5) * direction;
+
+        gsap.fromTo(
+          element,
+          {
+            opacity: 0,
+            y: 80,
+            rotate: rotateAmount,
+            scale: 0.94,
           },
-        });
+          {
+            opacity: 1,
+            y: 0,
+            rotate: 0,
+            scale: 1,
+            duration: 1.2,
+            ease: "elastic.out(1, 0.7)",
+            delay: Math.min(0.2, index * 0.02),
+            scrollTrigger: {
+              trigger: element,
+              start: "top 85%",
+              once: true,
+            },
+          }
+        );
       });
     });
 

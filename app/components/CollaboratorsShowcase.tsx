@@ -1,7 +1,9 @@
 "use client";
 
-import { CSSProperties, MouseEvent, useEffect, useMemo, useState } from "react";
+import { CSSProperties, MouseEvent, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 import CollaboratorProposalForm from "./CollaboratorProposalForm";
 
@@ -27,6 +29,8 @@ type Props = {
 
 export default function CollaboratorsShowcase({ collaborators }: Props) {
   const [open, setOpen] = useState(false);
+  const gridRef = useRef<HTMLDivElement | null>(null);
+  const hasAnimatedRef = useRef(false);
 
   const decorated = useMemo(
     () =>
@@ -36,6 +40,48 @@ export default function CollaboratorsShowcase({ collaborators }: Props) {
       })),
     [collaborators]
   );
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    gsap.registerPlugin(ScrollTrigger);
+  }, []);
+
+  useEffect(() => {
+    if (hasAnimatedRef.current || !gridRef.current) {
+      return;
+    }
+
+    const ctx = gsap.context(() => {
+      const cards = gsap.utils.toArray<HTMLElement>(".collab-card");
+      if (!cards.length) {
+        return;
+      }
+
+      gsap.set(cards, { opacity: 0, y: 50, rotate: -4, scale: 0.85 });
+
+      gsap.to(cards, {
+        opacity: 1,
+        y: 0,
+        rotate: 0,
+        scale: 1,
+        duration: 1.25,
+        ease: "elastic.out(1, 0.65)",
+        stagger: 0.08,
+        scrollTrigger: {
+          trigger: gridRef.current,
+          start: "top 80%",
+          once: true,
+        },
+        onComplete: () => {
+          hasAnimatedRef.current = true;
+        },
+      });
+    }, gridRef);
+
+    return () => ctx.revert();
+  }, [decorated.length]);
 
   return (
     <>
@@ -55,7 +101,7 @@ export default function CollaboratorsShowcase({ collaborators }: Props) {
             Todavía no hay colaboradores publicados. ¡Sé la primera persona en sumarte!
           </p>
         ) : (
-          <div className="collab-grid">
+          <div className="collab-grid" ref={gridRef}>
             {decorated.map((collaborator) => {
               const hasLink = Boolean(collaborator.webLink);
               const cardClassName = `collab-card reveal-on-scroll ${

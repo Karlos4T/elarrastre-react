@@ -1,8 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { CSSProperties, useEffect, useMemo, useState } from "react";
+import { CSSProperties, useEffect, useMemo, useRef, useState } from "react";
 import Slider from "react-slick";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 type Edition = {
   edition: string;
@@ -61,6 +63,7 @@ const EDITION_STYLES: EditionStyle[] = [
 
 export default function PreviousEditions() {
   const [isMobile, setIsMobile] = useState(false);
+  const sectionRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(max-width: 767px)");
@@ -72,6 +75,48 @@ export default function PreviousEditions() {
     mediaQuery.addEventListener("change", updateIsMobile);
     return () => mediaQuery.removeEventListener("change", updateIsMobile);
   }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    gsap.registerPlugin(ScrollTrigger);
+  }, []);
+
+  useEffect(() => {
+    if (!sectionRef.current) {
+      return;
+    }
+
+    const ctx = gsap.context(() => {
+      const cards = Array.from(
+        sectionRef.current?.querySelectorAll<HTMLElement>(".edition-card") ?? []
+      );
+
+      if (!cards.length) {
+        return;
+      }
+
+      gsap.set(cards, { opacity: 0, y: 40, rotate: -2, scale: 0.95 });
+
+      gsap.to(cards, {
+        opacity: 1,
+        y: 0,
+        rotate: 0,
+        scale: 1,
+        duration: 1,
+        ease: "elastic.out(1, 0.75)",
+        stagger: 0.08,
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top 80%",
+          once: true,
+        },
+      });
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, [isMobile]);
 
   const sliderSettings = useMemo(
     () => ({
@@ -125,6 +170,7 @@ export default function PreviousEditions() {
     <section
       id="ediciones"
       className="previous-editions reveal-on-scroll flex flex-col gap-8 rounded-[40px] border-4 border-[var(--color-ink)] bg-white/90 p-6 shadow-[0_14px_0_rgba(27,27,31,0.08)] sm:p-10"
+      ref={sectionRef}
     >
       <header className="flex flex-col gap-2">
         <span className="text-xs font-semibold uppercase tracking-[0.3em] text-[var(--color-ink)]/60">

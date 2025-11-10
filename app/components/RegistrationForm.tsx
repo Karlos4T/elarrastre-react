@@ -89,6 +89,9 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
       <p className="text-md leading-relaxed text-[var(--color-ink)]/80">
         Deja tu nombre y súmate al movimiento <span className="accent-text">#ElArrastrePorLaELA</span>.
       </p>
+      <p className="text-sm leading-relaxed text-[var(--color-ink)]/70">
+        ¿Ya tienes claro que vas a venir? ¡Genial! Apúntate para ayudarnos a organizar la comida solidaria: el pago de 12 € se realizará allí el día del evento.
+      </p>
       <label className="flex flex-col gap-2 my-5 text-md font-medium text-[var(--color-ink)]">
         Nombre completo
         <input
