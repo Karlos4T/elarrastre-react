@@ -179,9 +179,8 @@ export default function PreviousEditions() {
         <h2 className="text-2xl font-extrabold text-[var(--color-ink)]">
           Ediciones anteriores
         </h2>
-        <p className="max-w-2xl text-md font-medium text-[var(--color-ink)]/70">
-          Cada arrastre deja una estela de anécdotas, aprendizajes y abrazos. Así hemos
-          ido creciendo como comunidad.
+        <p className="text-md font-medium text-[var(--color-ink)]/70">
+          Cada edicion deja una estela de anécdotas, aprendizajes y abrazos. Así hemos ido creciendo y mejorando.
         </p>
       </header>
 
