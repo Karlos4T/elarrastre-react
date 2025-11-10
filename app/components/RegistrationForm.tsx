@@ -4,7 +4,7 @@ import { FormEvent, useState } from "react";
 import { useToast } from "./ToastProvider";
 
 type RegistrationFormProps = {
-  onSuccess?: () => void;
+  onSuccess?: (registeredCount: number) => void;
 };
 
 export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
@@ -68,7 +68,7 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
             : "¡Gracias por unirte!",
         variant: "success",
       });
-      onSuccess?.();
+      onSuccess?.(registeredCount);
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "No se pudo completar la solicitud.";

@@ -9,12 +9,12 @@ export default function HomeFooter() {
         © {new Date().getFullYear()} El Arrastre Solidario · Cultura que abraza, comunidad que
         transforma.
       </p>
-      <Link
+      {/* <Link
         href="/admin"
         className=""
       >
         Ir al panel
-      </Link>
+      </Link> */}
     </footer>
   );
 }

@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { CSSProperties, useEffect, useMemo, useState } from "react";
+import Slider from "react-slick";
 
 type Edition = {
   edition: string;
@@ -15,39 +16,56 @@ const EDITIONS: Edition[] = [
     edition: 'III',
     highlight: "Fuimos viento solidario",
     description:
-      "Más de 300 vecinos se arrastraron por la plaza para bailar, cocinar y recaudar fondos vitales para la investigación.",
+      "Artistas locales, microteatro y animadores llenaron la plaza de Villanueva de Bogas de historias que siguen resonando.",
     image: "/edicion-3.webp",
   },
   {
     edition: 'II',
     highlight: "Festival de abrazos",
     description:
-      "Artistas locales, microteatro y talleres inclusivos llenaron Villanueva de Bogas de historias que siguen resonando.",
+      "Más de 300 vecinos se acercaron a la plaza para bailar, colaborar y recaudar fondos vitales para la investigación.",
     image: "/edicion-2.webp",
   },
   {
     edition: 'I',
     highlight: "La primera ola",
     description:
-      "Nació El Arrastre con una degustación solidaria y la banda sonora improvisada de quienes hoy forman nuestra peña.",
+      "Nació la Jornada contra la ELA con una degustación solidaria y la banda sonora improvisada de quienes forman nuestra peña.",
     image: "/edicion-1.webp",
+  },
+];
+
+type EditionStyle = {
+  className: string;
+  primary: string;
+  secondary: string;
+};
+
+const EDITION_STYLES: EditionStyle[] = [
+  {
+    className: "edition-card--sunburst",
+    primary: "var(--color-sun)",
+    secondary: "var(--color-tangerine)",
+  },
+  {
+    className: "edition-card--lagoon",
+    primary: "var(--color-sky)",
+    secondary: "var(--color-lilac)",
+  },
+  {
+    className: "edition-card--meadow",
+    primary: "var(--color-forest)",
+    secondary: "var(--color-forest)",
   },
 ];
 
 export default function PreviousEditions() {
   const [isMobile, setIsMobile] = useState(false);
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [autoSliding, setAutoSliding] = useState(true);
-  const sliderRef = useRef<HTMLDivElement | null>(null);
-  const isAutoScrollingRef = useRef(false);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(max-width: 767px)");
     const updateIsMobile = () => {
       setIsMobile(mediaQuery.matches);
-      if (!mediaQuery.matches) {
-        setAutoSliding(true);
-      }
     };
 
     updateIsMobile();
@@ -55,52 +73,52 @@ export default function PreviousEditions() {
     return () => mediaQuery.removeEventListener("change", updateIsMobile);
   }, []);
 
-  useEffect(() => {
-    if (!isMobile || !autoSliding) return;
-    const interval = window.setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % EDITIONS.length);
-    }, 5000);
-    return () => window.clearInterval(interval);
-  }, [isMobile, autoSliding]);
+  const sliderSettings = useMemo(
+    () => ({
+      dots: true,
+      infinite: true,
+      speed: 500,
+      slidesToShow: 1,
+      slidesToScroll: 1,
+      autoplay: true,
+      autoplaySpeed: 5000,
+      arrows: false,
+      adaptiveHeight: true,
+      dotsClass: "slick-dots previous-editions__dots",
+    }),
+    []
+  );
 
-  useEffect(() => {
-    if (!isMobile) return;
-    const slider = sliderRef.current;
-    if (!slider) return;
-    const child = slider.children[currentSlide] as HTMLElement | undefined;
-    if (!child) return;
+  const renderEditionCard = (edition: Edition, index: number) => {
+    const variant = EDITION_STYLES[index % EDITION_STYLES.length];
+    const toneStyle = {
+      "--edition-accent": variant.primary,
+      "--edition-accent-secondary": variant.secondary,
+    } as CSSProperties;
 
-    isAutoScrollingRef.current = true;
-    slider.scrollTo({ left: child.offsetLeft, behavior: "smooth" });
-
-    const timeout = window.setTimeout(() => {
-      isAutoScrollingRef.current = false;
-    }, 500);
-
-    return () => window.clearTimeout(timeout);
-  }, [currentSlide, isMobile]);
-
-  const handleManualScroll = () => {
-    if (!isMobile || isAutoScrollingRef.current) return;
-    const slider = sliderRef.current;
-    if (!slider) return;
-
-    const children = Array.from(slider.children) as HTMLElement[];
-    if (!children.length) return;
-
-    let closestIndex = 0;
-    let minDistance = Infinity;
-
-    children.forEach((child, index) => {
-      const distance = Math.abs(child.offsetLeft - slider.scrollLeft);
-      if (distance < minDistance) {
-        minDistance = distance;
-        closestIndex = index;
-      }
-    });
-
-    setCurrentSlide(closestIndex);
-    setAutoSliding(false);
+    return (
+      <article
+        key={edition.edition}
+        className={`edition-card ${variant.className}`}
+        style={toneStyle}
+      >
+        <div className="edition-card__header">
+          <span className="edition-card__badge">{edition.edition}</span>
+          {edition.highlight}
+        </div>
+        <div className="edition-card__image">
+          <Image
+            src={edition.image}
+            alt={edition.highlight}
+            fill
+            className="object-cover"
+          />
+        </div>
+        <p className="text-md leading-relaxed text-[var(--color-ink)]/80">
+          {edition.description}
+        </p>
+      </article>
+    );
   };
 
   return (
@@ -121,48 +139,22 @@ export default function PreviousEditions() {
         </p>
       </header>
 
-      <div
-        ref={sliderRef}
-        onScroll={handleManualScroll}
-        className={`previous-editions__list gap-6 ${
-          isMobile
-            ? "flex snap-x snap-mandatory overflow-x-auto pb-4 -mx-2 px-2"
-            : "grid md:grid-cols-3"
-        }`}
-      >
-        {EDITIONS.map((edition, index) => (
-          <article
-            key={edition.edition}
-            className={`flex flex-col gap-4 rounded-[28px] border-2 border-[var(--color-ink)]/15 bg-[var(--color-cream)]/80 p-4 text-[var(--color-ink)] shadow-[0_10px_0_rgba(27,27,31,0.06)] transition hover:-translate-y-1 hover:shadow-[0_16px_0_rgba(27,27,31,0.12)] ${
-              isMobile
-                ? "flex-shrink-0 snap-center w-[calc(100vw-4rem)] max-w-sm"
-                : ""
-            } ${
-              isMobile && currentSlide === index
-                ? "border-[var(--color-ink)]/30 shadow-[0_16px_0_rgba(27,27,31,0.12)]"
-                : ""
-            }`}
-          >
-            <div className="flex items-center gap-3 text-md font-semibold uppercase tracking-[0.2em] text-[var(--color-ink)]/70">
-              <span className="inline-flex h-10 w-10 bg-[var(--color-sky)]/15 items-center justify-center rounded-full text-base font-bold">
-                {edition.edition}
-              </span>
-              {edition.highlight}
+      {isMobile ? (
+        <Slider
+          {...sliderSettings}
+          className="previous-editions__slider -mx-4 pb-2"
+        >
+          {EDITIONS.map((edition, index) => (
+            <div key={edition.edition} className="px-2">
+              {renderEditionCard(edition, index)}
             </div>
-            <div className="relative h-60 w-full overflow-hidden rounded-[18px] border border-[var(--color-ink)]/15 bg-white/70">
-              <Image
-                src={edition.image}
-                alt={edition.highlight}
-                fill
-                className="object-cover"
-              />
-            </div>
-            <p className="text-md leading-relaxed text-[var(--color-ink)]/80">
-              {edition.description}
-            </p>
-          </article>
-        ))}
-      </div>
+          ))}
+        </Slider>
+      ) : (
+        <div className="previous-editions__list grid gap-6 md:grid-cols-3">
+          {EDITIONS.map((edition, index) => renderEditionCard(edition, index))}
+        </div>
+      )}
     </section>
   );
 }

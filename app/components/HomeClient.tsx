@@ -126,6 +126,16 @@ export default function HomeClient({ collaborators, registrationsCount, faqs }: 
     ? Math.max(0, liveRegistrationsCount)
     : 0;
 
+  const handleRegistrationsAdded = (addedCount: number) => {
+    if (!Number.isFinite(addedCount)) {
+      return;
+    }
+    setLiveRegistrationsCount((prev) => {
+      const safePrev = Number.isFinite(prev) ? prev : 0;
+      return Math.max(0, safePrev + Math.max(0, Math.floor(addedCount)));
+    });
+  };
+
   return (
     <div className="page-shell min-h-screen w-full bg-[var(--color-blush)] text-[var(--color-ink)]">
       <HeroBanner />
@@ -145,7 +155,11 @@ export default function HomeClient({ collaborators, registrationsCount, faqs }: 
             setIsCollaboratorModalOpen(true);
           }}
         />
-        <RegistrationModal open={isRegistrationModalOpen} onClose={() => setIsRegistrationModalOpen(false)} />
+        <RegistrationModal
+          open={isRegistrationModalOpen}
+          onClose={() => setIsRegistrationModalOpen(false)}
+          onRegistered={handleRegistrationsAdded}
+        />
         <CollaboratorModal open={isCollaboratorModalOpen} onClose={() => setIsCollaboratorModalOpen(false)} />
 
         <section id="colaboradores" className="reveal-on-scroll flex flex-col gap-10">
@@ -175,7 +189,11 @@ type ModalProps = {
   onClose: () => void;
 };
 
-function RegistrationModal({ open, onClose }: ModalProps) {
+type RegistrationModalProps = ModalProps & {
+  onRegistered?: (count: number) => void;
+};
+
+function RegistrationModal({ open, onClose, onRegistered }: RegistrationModalProps) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -231,7 +249,12 @@ function RegistrationModal({ open, onClose }: ModalProps) {
         >
           ✕
         </button>
-        <RegistrationForm onSuccess={onClose} />
+        <RegistrationForm
+          onSuccess={(count) => {
+            onRegistered?.(count);
+            onClose();
+          }}
+        />
       </div>
     </div>
   );

@@ -44,7 +44,7 @@ export default function CollaboratorsShowcase({ collaborators }: Props) {
           <div className="flex flex-col">
             <h2 className="text-3xl font-extrabold text-[var(--color-ink)]">Colaboradores</h2>
             <p className="max-w-5xl text-lg font-medium text-[var(--color-ink)]/70">
-              Artistas, vecinas, asociaciones y colectivos que se arrastran por la causa. Si
+              Artistas, vecinas, asociaciones y colectivos que colaboran con la causa. Si
               quieres sumarte, cuéntanos tu propuesta.
             </p>
           </div>
