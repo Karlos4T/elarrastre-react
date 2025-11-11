@@ -13,6 +13,7 @@ import RegistrationForm from "./RegistrationForm";
 import HeroRegistrationSection from "./home/HeroRegistrationSection";
 import ContactInfoCard from "./home/ContactInfoCard";
 import HomeFooter from "./home/HomeFooter";
+import ActivitiesSection from "./ActivitiesSection";
 
 type Collaborator = {
   id: number;
@@ -140,10 +141,6 @@ export default function HomeClient({ collaborators, registrationsCount, faqs }: 
     <div className="page-shell min-h-screen w-full text-[var(--color-ink)]">
       <HeroBanner />
       <main className="flex min-h-screen w-full flex-col gap-24 px-6 py-16 pb-32 sm:px-10 lg:px-20 lg:pb-20">
-        <div className="shape-sunburst" />
-        <div className="shape-cloud" />
-        <div className="shape-heartband" />
-
         <HeroRegistrationSection
           friendlyCount={friendlyCount}
           onShowRegistration={() => {
@@ -160,6 +157,7 @@ export default function HomeClient({ collaborators, registrationsCount, faqs }: 
           onClose={() => setIsRegistrationModalOpen(false)}
           onRegistered={handleRegistrationsAdded}
         />
+        <ActivitiesSection />
         <CollaboratorModal open={isCollaboratorModalOpen} onClose={() => setIsCollaboratorModalOpen(false)} />
 
         <section id="colaboradores" className="reveal-on-scroll flex flex-col gap-10">

@@ -28,7 +28,7 @@ export default function HeroBanner() {
       gsap.set(".hero-blush-star", { x: -30 });
 
       gsap.set(".hero-campaign", { y: -15 });
-      gsap.set(".hero-venue-medal", { x: -15 });
+      gsap.set(".hero-venue-medal", { x: -40 });
       gsap.set(".green-flower", { x: -15 });
 
       gsap.set(".hero-square-left", { x: -15, y: 15 });
@@ -333,11 +333,7 @@ function Info() {
 }
 
 function PaymentCard() {
-  return <div className="hero-payment-card">
-    <span className="iban">ES02 3081 0202 0523 0865 7317</span>
-    <span className="specifications">ingreso en cuenta con concepto (no obligatorio) ELA + NOMBRE</span>
-    <span className="donation-to">DONACIÓN INTEGRA A </span>
-  </div>;
+  return <div className="hero-payment-card"/>;
 }
 
 function ActionButton() {

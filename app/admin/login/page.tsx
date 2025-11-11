@@ -54,7 +54,6 @@ export default function AdminLoginPage() {
   return (
     <div className="page-shell min-h-screen bg-[var(--color-cream)] text-[var(--color-ink)]">
       <main className="relative mx-auto flex min-h-screen w-full max-w-md flex-col justify-center gap-6 px-6 py-16">
-        <div className="shape-sunburst" />
         <form
           onSubmit={handleSubmit}
           className="relative flex w-full flex-col gap-5 rounded-[36px] border-4 border-[var(--color-ink)] bg-white p-8 shadow-[0_16px_0_rgba(27,27,31,0.1)]"

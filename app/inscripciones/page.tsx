@@ -5,7 +5,6 @@ export default function InscripcionesPage() {
   return (
     <div className="page-shell min-h-screen bg-[var(--color-cream)] text-[var(--color-ink)]">
       <main className="relative mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-14 px-6 py-16 sm:px-10 lg:px-20">
-        <div className="shape-sunburst" />
         <header className="relative flex flex-col gap-6 rounded-[40px] border-4 border-[var(--color-ink)] bg-white p-8 shadow-[0_16px_0_rgba(27,27,31,0.08)] sm:p-12">
           <Link href="/" className="text-md font-semibold text-[var(--color-ink)]">
             ← Volver a la plaza solidaria

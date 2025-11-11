@@ -120,8 +120,6 @@ export default async function AdminPage() {
   return (
     <div className="page-shell min-h-screen bg-[var(--color-cream)] text-[var(--color-ink)]">
       <main className="relative mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-16 px-6 py-16 sm:px-10 lg:px-20">
-        <div className="shape-sunburst" />
-        <div className="shape-cloud" />
         <AdminDashboard
           registrations={registrationsResult.data ?? []}
           collaborators={collaborators}
