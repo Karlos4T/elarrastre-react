@@ -205,7 +205,7 @@ function CollaboratorModal({ open, onClose }: ModalProps) {
 
   const modal = (
     <div
-      className="modal-backdrop"
+      className="modal-backdrop bg-white"
       role="dialog"
       aria-modal="true"
       onClick={handleOverlayClick}

@@ -1,6 +1,6 @@
 export default function ContactInfoCard() {
   return (
-    <div className="organic-card flex flex-col gap-5 p-8 text-lg leading-relaxed text-[var(--color-ink)] lg:text-xl">
+    <div className="organic-card bg-white flex flex-col gap-5 p-8 text-lg leading-relaxed text-[var(--color-ink)] lg:text-xl">
       <h3 className="text-2xl font-semibold lg:text-3xl">Propón tu colaboración</h3>
       <p>
         ¿Tienes una actuación, eres DJ o quieres apoyar la logística? Escríbenos y te ayudamos a

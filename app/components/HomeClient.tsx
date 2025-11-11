@@ -137,7 +137,7 @@ export default function HomeClient({ collaborators, registrationsCount, faqs }: 
   };
 
   return (
-    <div className="page-shell min-h-screen w-full bg-[var(--color-blush)] text-[var(--color-ink)]">
+    <div className="page-shell min-h-screen w-full text-[var(--color-ink)]">
       <HeroBanner />
       <main className="flex min-h-screen w-full flex-col gap-24 px-6 py-16 pb-32 sm:px-10 lg:px-20 lg:pb-20">
         <div className="shape-sunburst" />

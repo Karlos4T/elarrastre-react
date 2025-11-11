@@ -1,0 +1,76 @@
+@media (max-width: 480px) {
+  .hero-banner {
+    min-height: auto;
+    padding-bottom: 2rem;
+    gap: 1.2rem;
+  }
+
+  .hero-grid,
+  .hero-grid--mosaic {
+    min-height: auto;
+    height: auto;
+  }
+
+  .hero-grid--mosaic {
+    grid-template-rows: repeat(24, minmax(12px, 1fr));
+  }
+
+  .hero-panel--campaign {
+    grid-area: 2 / 2 / 5 / 12;
+  }
+
+  .hero-venue-medal {
+    grid-area: 5 / 2 / 9 / 12;
+    padding: 1.2rem;
+    background-size: cover;
+  }
+
+  .hero-circle-date {
+    grid-area: 9 / 7 / 13 / 13;
+    font-size: 1.4rem;
+    line-height: 1.4rem;
+    padding: 1.2rem;
+    align-items: flex-start;
+  }
+
+  .hero-star {
+    grid-area: 11 / 1 / 19 / 13;
+    padding: 1.6rem;
+  }
+
+  .hero-gear-orange {
+    grid-area: 18 / 4 / 23 / 10;
+    padding: 1.4rem;
+  }
+
+  .hero-blush-abstract-1 {
+    grid-area: 1 / 7 / 4 / 13;
+  }
+
+  .hero-blush-abstract-2 {
+    grid-area: 6 / 1 / 10 / 7;
+  }
+
+  .hero-blush-medal {
+    grid-area: 14 / 1 / 22 / 9;
+  }
+
+  .hero-blush-star {
+    grid-area: 4 / 1 / 8 / 5;
+  }
+
+  .hero-green-flower {
+    grid-area: 1 / 2 / 3 / 7;
+  }
+
+  .hero-spain-flag {
+    grid-area: 22 / 9 / 24 / 13;
+    background-size: 60px;
+  }
+
+  .hero-info {
+    grid-area: 23 / 2 / 25 / 12;
+    font-size: 0.9rem;
+    gap: 0.4rem;
+  }
+}
