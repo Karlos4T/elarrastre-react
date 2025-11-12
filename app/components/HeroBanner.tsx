@@ -45,7 +45,7 @@ export default function HeroBanner() {
       });
 
       timeline
-        // Primer grupo - Aparecen casi simultáneamente
+        // Primer grupo — aparecen casi en bloque, con mucho solape
         .from(".hero-blush-abstract-2", {
           opacity: 0,
           y: 40,
@@ -56,136 +56,117 @@ export default function HeroBanner() {
           rotate: -180,
           x: -40,
           duration: 0.5,
-        }, "-=0.3")
+        }, "-=0.45")
         .from(".hero-blush-abstract-1", {
           opacity: 0,
           x: -30,
           duration: 0.5,
-        }, "-=0.2")
+        }, "-=0.42")
         .from(".hero-blush-star", {
           opacity: 0,
           rotate: 180,
           x: -40,
           duration: 0.5,
-        }, "-=0.2")
-        // Segundo grupo - Elementos principales
+        }, "-=0.4")
+
+        // Segundo grupo — elementos principales, arranque casi simultáneo
         .from(".hero-star", {
           opacity: 0,
           scale: 0.9,
           duration: 0.4,
-        }, "-=0.1")
+        }, "-=0.35")
         .from(".hero-campaign", {
           opacity: 0,
           x: 300,
-          duration: 0.6,
-        }, "-=0.1")
+          duration: 0.5,
+        }, "-=0.38")
         .from(".hero-gear-blue", {
           opacity: 0,
           x: "+=80",
           rotate: 90,
-          duration: 0.5,
-        }, "-=0.2")
+          duration: 0.45,
+        }, "-=0.38")
         .from(".hero-square-left", {
           opacity: 0,
           x: -80,
           duration: 0.4,
-        }, "-=0.2")
+        }, "-=0.36")
 
-        // Tercer grupo - Elementos secundarios
+        // Tercer grupo — secundarios, con solape intenso
         .from(".hero-venue-medal", {
           opacity: 0,
           x: -100,
           duration: 0.4,
-        }, "-=0.1")
+        }, "-=0.32")
         .from(".hero-green-flower", {
           opacity: 0,
           scale: 0,
           rotate: -180,
-          duration: 0.4,
-        }, "-=0.1")
+          duration: 0.35,
+        }, "-=0.3")
+        .from(".hero-orange-shinner", {
+          opacity: 0,
+          scale: 0,
+          rotate: -180,
+          duration: 0.35,
+        }, "-=0.3")
         .from(".hero-square-bottom", {
           opacity: 0,
           x: -60,
           y: 60,
-          duration: 0.4,
-        }, "-=0.1")
+          duration: 0.35,
+        }, "-=0.3")
         .from(".hero-pill", {
           opacity: 0,
           y: 60,
           duration: 0.3,
-        }, "-=0.1")
+        }, "-=0.28")
         .from(".hero-circle-date", {
           opacity: 0,
           scale: 0.8,
-          duration: 0.4,
-        }, "-=0.1")
+          duration: 0.35,
+        }, "-=0.28")
         .from(".hero-gear-orange", {
           opacity: 0,
           rotate: -90,
-          duration: 0.5,
-        }, "-=0.2")
+          duration: 0.4,
+        }, "-=0.3")
         .from(".hero-spain-flag", {
           opacity: 0,
           scale: 0.8,
           y: 20,
-          duration: 0.4,
-        }, "-=0.1")
+          duration: 0.35,
+        }, "-=0.3")
         .from(".hero-info", {
           opacity: 0,
           y: 15,
-          duration: 0.4,
-        }, "-=0.1")
+          duration: 0.35,
+        }, "-=0.28")
         .from(".hero-payment-card", {
           opacity: 0,
           y: 20,
-          duration: 0.4,
-        }, "-=0.1")
+          duration: 0.35,
+        }, "-=0.28")
 
-        // Elementos de acción
+        // Cuarto grupo — acción final, cierre rápido
         .from(".hero-action-button", {
           y: "+=120",
-          scale: 0.9,
-          duration: 0.5,
-        }, "-=0.2")
+          scale: 0,
+          duration: 0.4,
+        }, "-=0.32")
+        .from(".hero-sun-shinner", {
+          opacity: 0,
+          scale: 0,
+          rotate: -180,
+          duration: 0.35,
+        }, "-=0.28")
         .to(".hero-apuntate-marker", {
           opacity: 1,
           y: 0,
           scale: 1,
-          duration: 0.5,
+          duration: 0.4,
           ease: "back.out(1.7)",
-        }, "-=0.1");
-
-      // Animación adicional para el texto principal
-      gsap.from(".hero-star__text .line", {
-        opacity: 0,
-        y: 20,
-        duration: 0.5,
-        stagger: 0.1,
-        delay: 0.2,
-        ease: "power2.out"
-      });
-
-      // Animaciones continuas
-      gsap.to(".hero-blush-medal", {
-        rotate: "+=360",
-        duration: 12,
-        ease: "linear",
-        repeat: -1,
-      });
-
-      // gsap.to(".hero-gear-orange", {
-      //   rotate: "-=360",
-      //   duration: 16,
-      //   ease: "linear",
-      //   repeat: -1,
-      // });
-
-      gsap.to(".hero-gear-blue", {
-        rotate: "+=360",
-        duration: 20,
-        ease: "linear",
-        repeat: -1,
-      });
+        }, "-=0.25");
 
     }, bannerRef);
 
@@ -211,6 +192,8 @@ export default function HeroBanner() {
           <BlueGear />
           <SpainFlag />
           <Info />
+          <OrangeShinner />
+          <SunShinner />
           {/* <GreenSquare className="hero-square-left" />
           <GreenSquare className="hero-square-bottom" variant="corner" />
           <GreenPill /> */}
@@ -322,6 +305,16 @@ function SpainFlag() {
   return <div className="hero-shape hero-spain-flag" aria-hidden="true" />;
 }
 
+function OrangeShinner() {
+  return <div className="hero-shape hero-orange-shinner" aria-hidden="true" />;
+}
+
+
+function SunShinner() {
+  return <div className="hero-shape hero-sun-shinner" aria-hidden="true" />;
+}
+
+
 function Info() {
   return <div className="hero-info info" aria-hidden="true" >
     <span className="word">COMIDA</span>
@@ -333,7 +326,7 @@ function Info() {
 }
 
 function PaymentCard() {
-  return <div className="hero-payment-card"/>;
+  return <div className="hero-payment-card" />;
 }
 
 function ActionButton() {

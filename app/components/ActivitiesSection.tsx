@@ -121,10 +121,7 @@ export default function ActivitiesSection() {
                             )}
 
                             <h3
-                                className={`font-extrabold text-xl md:text-2xl ${activity.highlight
-                                    ? "text-[var(--color-sun)]"
-                                    : "text-[var(--color-ink)]"
-                                    }`}
+                                className={`font-extrabold text-xl z-10 md:text-2xl text-[var(--color-ink)]`}
                             >
                                 {activity.title}
                             </h3>
