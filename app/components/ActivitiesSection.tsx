@@ -140,7 +140,7 @@ export default function ActivitiesSection() {
         return (
             <article
                 key={activity.title}
-                className={`
+                className={`col-span-2 
           activity-card edition-card relative overflow-hidden flex flex-col gap-4
           p-6 border-4 border-[var(--color-ink)] rounded-[32px] bg-white/[0.85]
           shadow-[0_12px_0_rgba(27,27,31,0.18)]
@@ -195,7 +195,7 @@ export default function ActivitiesSection() {
               `}
                             style={toneStyle}
                         >
-                            <h3 className="font-extrabold text-lg text-[var(--color-ink)] text-center">
+                            <h3 className="font-extrabold z-10 text-lg text-[var(--color-ink)] text-center">
                                 {activity.title}
                             </h3>
                             {activity.description && (
