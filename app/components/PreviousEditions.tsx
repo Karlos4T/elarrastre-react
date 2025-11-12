@@ -169,7 +169,7 @@ export default function PreviousEditions() {
   return (
     <section
       id="ediciones"
-      className="previous-editions reveal-on-scroll flex flex-col gap-8 rounded-[40px] border-4 border-[var(--color-ink)] bg-white/90 p-6 shadow-[0_14px_0_rgba(27,27,31,0.08)] sm:p-10"
+      className="previous-editions reveal-on-scroll flex flex-col gap-8  rounded-[40px]  sm:border-4  sm:border-[var(--color-ink)]  sm:bg-white/90 shadow-[0_14px_0_rgba(27,27,31,0.08)] sm:p-10"
       ref={sectionRef}
     >
       <header className="flex flex-col gap-2">
