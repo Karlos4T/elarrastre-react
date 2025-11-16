@@ -236,6 +236,32 @@ button {
   color: var(--color-cream);
 }
 
+.hero-panel--collaboration {
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+}
+
+.hero-panel__lead--collaboration {
+  padding-left: 1rem;
+  color: var(--color-sky);
+  font-weight: bolder;
+  font-size: 0.6rem;
+}
+
+.hero-panel__text--collaboration {
+  padding: 0.3rem 0 0.3rem 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: start;
+  background: var(--color-sun);
+  color: var(--color-tangerine);
+  font-size: 0.5rem;
+  border-radius: 0 50px 50px 0;
+  font-weight: bolder;
+}
+
 .hero-panel__lead--campaign {
   font-size: clamp(2.5rem, 7vw, 3rem);
   font-weight: 700;
@@ -254,7 +280,7 @@ button {
 .hero-panel__text--campaign .second {
   letter-spacing: 0;
   line-height: 0.9rem;
-  font-size: 0-8rem;
+  font-size: 0.8rem;
   margin: 0;
 }
 
@@ -392,6 +418,38 @@ button {
 
 .hero-blush-medal {
   background-image: url("/shapes/blush-medal.svg");
+}
+
+.hero-blush-medal-2 {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: start;
+  background-image: url("/shapes/blush-medal.svg");
+
+}
+
+.hero-blush-medal-2 .en-recuerdo {
+  line-height: 1rem;
+  color: var(--color-sky);
+  letter-spacing: 0px;
+  font-size: 0.6rem;
+  font-weight: bold;
+}
+
+.hero-blush-medal-2 .text-container {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+}
+
+.hero-blush-medal-2 .rosi {
+  color: var(--color-tangerine);
+  font-weight: bolder;
+  font-size: 1.6rem;
+  letter-spacing: -2px;
+  line-height: 1.8rem;
 }
 
 .hero-blush-star {
@@ -1134,6 +1192,10 @@ button {
   grid-area: 2 / 7 / 4 / 13;
 }
 
+.hero-panel--collaboration {
+  grid-area: 13 / 1 / 14 / 6;
+}
+
 .hero-gear-blue {
   grid-area: 1 / 1 / 6 / 5;
 }
@@ -1160,6 +1222,10 @@ button {
 
 .hero-blush-medal {
   grid-area: 8 / 1 / 24 / 8;
+}
+
+.hero-blush-medal-2 {
+  grid-area: 15 / 4 / 22 / 13;
 }
 
 .hero-blush-star {
@@ -1195,7 +1261,7 @@ button {
 }
 
 .hero-payment-card {
-  grid-area: 17 / 1 / 22 / 8;
+  grid-area: 15 / 1 / 22 / 6;
 }
 
 .hero-orange-shinner {
@@ -1203,7 +1269,7 @@ button {
 }
 
 .hero-sun-shinner {
-  grid-area: 20 / 7 / 21 / 11;
+  grid-area: 17 / 6 / 19 / 7;
 }
 
 
@@ -1254,6 +1320,20 @@ button {
     grid-area: 2 / 7 / 4 / 13;
   }
 
+  .hero-panel--collaboration {
+    margin-right: 1rem;
+    grid-area: 12 / 1 / 16 / 6;
+  }
+
+  .hero-panel__lead--collaboration {
+    font-size: 0.6rem;
+  }
+
+  .hero-panel__text--collaboration {
+    font-size: 0.5rem;
+  }
+
+
   .hero-gear-blue {
     grid-area: 1 / 1 / 4 / 4;
   }
@@ -1272,6 +1352,21 @@ button {
 
   .hero-blush-medal {
     grid-area: 8 / 1 / 16 / 6;
+  }
+
+  .hero-blush-medal-2 {
+    grid-area: 15 / 6 / 22 / 13;
+  }
+
+  .hero-blush-medal-2 .rosi {
+    font-size: 2rem;
+    line-height: 1.8rem;
+  }
+
+
+  .hero-blush-medal-2 .en-recuerdo {
+    line-height: 1rem;
+    font-size: 0.8rem;
   }
 
   .hero-blush-star {
@@ -1340,15 +1435,15 @@ button {
   }
 
   .hero-payment-card {
-    grid-area: 16 / 1 / 22 / 9;
+    grid-area: 15 / 1 / 22 / 8;
   }
 
   .hero-orange-shinner {
-    grid-area: 16 / 9 / 17 / 12;
+    grid-area: 13 / 11 / 14 / 12;
   }
 
   .hero-sun-shinner {
-    grid-area: 19 / 9 / 20 / 11;
+    grid-area: 16 / 8 / 18 / 9;
   }
 }
 
@@ -1369,6 +1464,20 @@ button {
     grid-area: 2 / 15 / 4 / 21;
   }
 
+  .hero-panel--collaboration {
+    grid-area: 11 / 1 / 16 / 8;
+  }
+
+  .hero-panel__lead--collaboration {
+    font-size: 0.8rem;
+  }
+
+  .hero-panel__text--collaboration {
+    font-size: 0.8rem;
+  }
+
+
+
   .hero-gear-blue {
     grid-area: 1 / 7 / 5 / 10;
   }
@@ -1387,6 +1496,10 @@ button {
 
   .hero-blush-medal {
     grid-area: 8 / 1 / 16 / 7;
+  }
+
+  .hero-blush-medal-2 {
+    grid-area: 15 / 10 / 22 / 30;
   }
 
   .hero-blush-star {
@@ -1443,7 +1556,7 @@ button {
   }
 
   .hero-sun-shinner {
-    grid-area: 17 / 15 / 18 / 19;
+    grid-area: 15 / 10 / 17 / 11;
   }
 
   .hero-apuntate-marker {
@@ -1484,6 +1597,10 @@ button {
 
   .hero-blush-medal {
     grid-area: 8 / 1 / 16 / 7;
+  }
+
+  .hero-blush-medal-2 {
+    grid-area: 15 / 20 / 22 / 40;
   }
 
   .hero-blush-star {
@@ -1539,7 +1656,7 @@ button {
   }
 
   .hero-sun-shinner {
-    grid-area: 17 / 19 / 21 / 21;
+    grid-area: 15 / 12 / 17 / 13;
   }
 
 }
@@ -1694,7 +1811,7 @@ button {
   }
 
   .hero-sun-shinner {
-    grid-area: 16 / 24 / 20 / 26;
+    grid-area: 15 / 11 / 17 / 12;
   }
 }
 

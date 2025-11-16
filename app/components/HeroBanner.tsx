@@ -25,6 +25,7 @@ export default function HeroBanner() {
       gsap.set(".hero-blush-abstract-2", { y: -20 });
       gsap.set(".hero-blush-abstract-1", { x: 80 });
       gsap.set(".hero-blush-medal", { x: -120 });
+      gsap.set(".hero-blush-medal-2", { y: 100, x: 50 });
       gsap.set(".hero-blush-star", { x: -30 });
 
       gsap.set(".hero-campaign", { y: -15 });
@@ -75,6 +76,11 @@ export default function HeroBanner() {
           scale: 0.9,
           duration: 0.4,
         }, "-=0.35")
+        .from(".hero-collaboration", {
+          opacity: 0,
+          x: -300,
+          duration: 0.5,
+        }, "-=0.38")
         .from(".hero-campaign", {
           opacity: 0,
           x: 300,
@@ -182,9 +188,11 @@ export default function HeroBanner() {
           <BlushAbstractOne />
           <BlushAbstractTwo />
           <BlushMedal />
+          <BlushMedal2 />
           <BlushStar />
           <GreenFlower />
           <CampaignAnnouncement />
+          <SpecialCollaboration />
           <VenueMedal />
           <DateCircle />
           <HeroStarMessage />
@@ -197,7 +205,7 @@ export default function HeroBanner() {
           {/* <GreenSquare className="hero-square-left" />
           <GreenSquare className="hero-square-bottom" variant="corner" />
           <GreenPill /> */}
-          <ActionButton />
+          {/* <ActionButton /> */}
           <PaymentCard />
         </div>
         <ApuntateMarker />
@@ -232,6 +240,19 @@ function CampaignAnnouncement() {
     </div>
   );
 }
+
+function SpecialCollaboration() {
+  return (
+    <div className="hero-panel--collaboration hero-collaboration">
+      <span className="hero-panel__lead hero-panel__lead--collaboration">Colaboración especial</span>
+      <div className="hero-panel__text hero-panel__text--collaboration">
+        <p className="first">RUTA CICLISTA DE MTB</p>
+        <p className="second">EXHIBICIÓN DE COCHES CLÁSICOS</p>
+      </div>
+    </div>
+  );
+}
+
 
 function BlueGear() {
   return <div className="hero-gear hero-gear-blue" aria-hidden="true" />;
@@ -291,6 +312,15 @@ function BlushAbstractTwo() {
 
 function BlushMedal() {
   return <div className="hero-shape hero-blush-medal" aria-hidden="true" />;
+}
+
+function BlushMedal2() {
+  return <div className="hero-shape hero-blush-medal-2" aria-hidden="true" >
+    <div className="text-container">
+      <span className="en-recuerdo">EN RECUERDO DE</span>
+      <span className="rosi">Rosi Téllez</span>
+    </div>
+  </div>;
 }
 
 function BlushStar() {

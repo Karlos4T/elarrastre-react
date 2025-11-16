@@ -15,7 +15,7 @@ type Activity = {
 
 const ACTIVITIES: Activity[] = [
     {
-        title: "Ruta Ciclista",
+        title: "Ruta Ciclista de MTB",
         highlight: true,
         description: "Participa en una ruta única para todas las edades",
         image: "/bicis.jpeg",
@@ -27,9 +27,9 @@ const ACTIVITIES: Activity[] = [
         image: "/clasicos.jpeg",
     },
     { title: "Comida + Aperitivo", description: "" },
-    { title: "Castillos Hinchables", description: "" },
+    { title: "Juegos infantiles", description: "" },
+    { title: "Tardeo con DJs", description: "" },
     { title: "Sorteos", description: "" },
-    { title: "DJs", description: "" },
 ];
 
 const ACTIVITY_STYLES = [
